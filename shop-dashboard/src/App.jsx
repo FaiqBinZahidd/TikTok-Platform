@@ -30,7 +30,14 @@ import {
   FileSpreadsheet,
   Database,
   Clock,
-  Smartphone
+  Smartphone,
+  Calendar,
+  Wallet,
+  Plus,
+  Target,
+  Calculator,
+  Info,
+  HelpCircle
 } from 'lucide-react';
 
 // --- Global Helper Functions ---
@@ -69,11 +76,21 @@ const NavButton = ({ icon: Icon, label, active, onClick }) => (
   </button>
 );
 
-const StatCard = ({ title, value, icon: Icon, colorClass, subText }) => (
-  <div className={`bg-gradient-to-br ${colorClass} rounded-3xl p-5 shadow-sm border border-white/50 backdrop-blur-sm hover:shadow-md transition-shadow`}>
+const StatCard = ({ title, value, icon: Icon, colorClass, subText, info }) => (
+  <div className={`bg-gradient-to-br ${colorClass} rounded-3xl p-5 shadow-sm border border-white/50 backdrop-blur-sm hover:shadow-md transition-shadow group relative`}>
     <div className="flex justify-between items-start">
         <div>
-            <p className={`text-[10px] font-bold mb-1 uppercase tracking-wider opacity-70`}>{title}</p>
+            <div className="flex items-center gap-1 mb-1">
+                <p className={`text-[10px] font-bold uppercase tracking-wider opacity-70`}>{title}</p>
+                {info && (
+                    <div className="group/tooltip relative">
+                        <HelpCircle className="w-3 h-3 opacity-50 cursor-help" />
+                        <div className="absolute left-0 top-6 w-48 p-2 bg-gray-800 text-white text-[10px] rounded-lg opacity-0 group-hover/tooltip:opacity-100 transition-opacity z-50 pointer-events-none">
+                            {info}
+                        </div>
+                    </div>
+                )}
+            </div>
             <p className="text-2xl lg:text-3xl font-bold text-gray-800">{value}</p>
         </div>
         <div className="w-10 h-10 bg-white/80 rounded-full flex items-center justify-center shadow-sm backdrop-blur-sm">
@@ -95,7 +112,6 @@ const ProductDetailModal = ({ product, onClose, currency }) => {
   return (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm" onClick={onClose}>
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-3xl overflow-hidden animate-in fade-in zoom-in duration-200 flex flex-col max-h-[90vh]" onClick={e => e.stopPropagation()}>
-              {/* Modal Header */}
               <div className="p-6 border-b border-gray-100 flex justify-between items-start bg-gray-50/50 flex-shrink-0">
                   <div>
                       <div className="flex items-center gap-2 mb-2">
@@ -113,7 +129,6 @@ const ProductDetailModal = ({ product, onClose, currency }) => {
                       <div className="flex flex-wrap gap-3 text-xs text-gray-500">
                          <span className="flex items-center gap-1 bg-white px-2 py-1 rounded border border-gray-200 shadow-sm"><Smartphone className="w-3 h-3 text-teal-600" /> Platform: <strong>{product.platform}</strong></span>
                          <span className="flex items-center gap-1 bg-white px-2 py-1 rounded border border-gray-200 shadow-sm"><FileText className="w-3 h-3 text-indigo-600" /> Source: {product.sourceFile}</span>
-                         <span className="flex items-center gap-1 bg-white px-2 py-1 rounded border border-gray-200 shadow-sm"><Clock className="w-3 h-3 text-orange-600" /> Import: {new Date(product.importDate || Date.now()).toLocaleDateString()}</span>
                       </div>
                   </div>
                   <button onClick={onClose} className="p-2 hover:bg-gray-200 rounded-full transition-colors">
@@ -122,7 +137,6 @@ const ProductDetailModal = ({ product, onClose, currency }) => {
               </div>
               
               <div className="p-6 overflow-y-auto">
-                  {/* Key Metrics */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                       <div className="p-4 bg-teal-50 rounded-2xl border border-teal-100 text-center">
                           <p className="text-xs text-teal-600 font-bold uppercase mb-1">Total Sales</p>
@@ -142,10 +156,7 @@ const ProductDetailModal = ({ product, onClose, currency }) => {
                       </div>
                   </div>
 
-                  {/* Deep Dive Section */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                      
-                      {/* 1. GMV Source Breakdown */}
                       <div>
                           <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide mb-4 flex items-center gap-2">
                               <DollarSign className="w-4 h-4" /> GMV Source Analysis
@@ -171,14 +182,11 @@ const ProductDetailModal = ({ product, onClose, currency }) => {
                               ))}
                           </div>
                       </div>
-
-                      {/* 2. Traffic & Conversion Funnel */}
                       <div>
                           <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide mb-4 flex items-center gap-2">
                               <MousePointer2 className="w-4 h-4" /> Traffic & Conversion
                           </h3>
                           <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-6">
-                              {/* Views */}
                               <div className="relative pl-8 border-l-2 border-gray-200 pb-6">
                                   <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-gray-300 border-2 border-white"></div>
                                   <p className="text-xs text-gray-500 uppercase font-bold mb-1">Total Views</p>
@@ -186,13 +194,11 @@ const ProductDetailModal = ({ product, onClose, currency }) => {
                                       {(product.shopViews + (product.videoViews || 0) + (product.liveViews || 0)).toLocaleString()}
                                   </p>
                               </div>
-                              {/* Clicks (Estimated from CTR if available) */}
                               <div className="relative pl-8 border-l-2 border-gray-200 pb-6">
                                   <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-blue-300 border-2 border-white"></div>
                                   <p className="text-xs text-gray-500 uppercase font-bold mb-1">CTR (Click Through)</p>
                                   <p className="text-lg font-bold text-blue-600">{product.ctr}</p>
                               </div>
-                              {/* Conversion */}
                               <div className="relative pl-8 border-l-2 border-teal-500">
                                   <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-teal-500 border-2 border-white shadow-sm"></div>
                                   <p className="text-xs text-gray-500 uppercase font-bold mb-1">Final Conversion</p>
@@ -200,10 +206,8 @@ const ProductDetailModal = ({ product, onClose, currency }) => {
                               </div>
                           </div>
                       </div>
-
                   </div>
               </div>
-              
               <div className="p-4 border-t border-gray-100 bg-gray-50 flex justify-end flex-shrink-0">
                   <button onClick={onClose} className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50">
                       Close Details
@@ -212,6 +216,331 @@ const ProductDetailModal = ({ product, onClose, currency }) => {
           </div>
       </div>
   );
+};
+
+const MediaView = ({ products, currency }) => {
+    const videoStats = products.reduce((acc, p) => {
+        acc.gmv += p.videoGmv || 0;
+        acc.views += p.videoViews || 0;
+        return acc;
+    }, { gmv: 0, views: 0 });
+
+    const liveStats = products.reduce((acc, p) => {
+        acc.gmv += p.liveGmv || 0;
+        acc.views += p.liveViews || 0;
+        return acc;
+    }, { gmv: 0, views: 0 });
+
+    const topVideos = [...products].sort((a, b) => b.videoGmv - a.videoGmv).slice(0, 5);
+    const topLives = [...products].sort((a, b) => b.liveGmv - a.liveGmv).slice(0, 5);
+
+    return (
+        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
+            <h2 className="text-2xl font-bold text-gray-800">Media Performance</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-gradient-to-br from-indigo-50 to-white p-6 rounded-3xl border border-indigo-100 shadow-sm">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="p-3 bg-indigo-100 rounded-xl">
+                            <Video className="w-6 h-6 text-indigo-600" />
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-indigo-900 text-lg">Short Video</h3>
+                            <p className="text-xs text-indigo-500">Content Performance</p>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 mb-6">
+                        <div className="bg-white p-3 rounded-xl border border-indigo-50">
+                            <p className="text-xs text-gray-400 font-bold uppercase">Revenue</p>
+                            <p className="text-xl font-bold text-indigo-700">{formatCurrency(videoStats.gmv, currency)}</p>
+                        </div>
+                        <div className="bg-white p-3 rounded-xl border border-indigo-50">
+                            <p className="text-xs text-gray-400 font-bold uppercase">Total Views</p>
+                            <p className="text-xl font-bold text-gray-700">{videoStats.views.toLocaleString()}</p>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 className="text-sm font-bold text-gray-600 mb-3 uppercase tracking-wider">Top Content Products</h4>
+                        <div className="space-y-2">
+                            {topVideos.map(p => (
+                                <div key={p.id} className="flex justify-between items-center bg-white p-2 rounded-lg border border-gray-100 text-sm">
+                                    <span className="truncate w-1/2">{p.name}</span>
+                                    <span className="font-mono font-bold text-indigo-600">{formatCurrency(p.videoGmv, currency)}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="bg-gradient-to-br from-rose-50 to-white p-6 rounded-3xl border border-rose-100 shadow-sm">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="p-3 bg-rose-100 rounded-xl">
+                            <Eye className="w-6 h-6 text-rose-600" />
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-rose-900 text-lg">Live Streaming</h3>
+                            <p className="text-xs text-rose-500">Real-time Sales</p>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 mb-6">
+                        <div className="bg-white p-3 rounded-xl border border-rose-50">
+                            <p className="text-xs text-gray-400 font-bold uppercase">Revenue</p>
+                            <p className="text-xl font-bold text-rose-700">{formatCurrency(liveStats.gmv, currency)}</p>
+                        </div>
+                        <div className="bg-white p-3 rounded-xl border border-rose-50">
+                            <p className="text-xs text-gray-400 font-bold uppercase">Total Views</p>
+                            <p className="text-xl font-bold text-gray-700">{liveStats.views.toLocaleString()}</p>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 className="text-sm font-bold text-gray-600 mb-3 uppercase tracking-wider">Top Live Products</h4>
+                        <div className="space-y-2">
+                            {topLives.map(p => (
+                                <div key={p.id} className="flex justify-between items-center bg-white p-2 rounded-lg border border-gray-100 text-sm">
+                                    <span className="truncate w-1/2">{p.name}</span>
+                                    <span className="font-mono font-bold text-rose-600">{formatCurrency(p.liveGmv, currency)}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const FinanceView = ({ products, currency }) => {
+    const [cogsPercent, setCogsPercent] = useState(40);
+    const [adSpend, setAdSpend] = useState(0);
+    const [fixedCost, setFixedCost] = useState(0);
+
+    const totalRevenue = products.reduce((sum, p) => sum + p.gmv, 0);
+    const estimatedCOGS = totalRevenue * (cogsPercent / 100);
+    const grossProfit = totalRevenue - estimatedCOGS;
+    const netProfit = grossProfit - adSpend - fixedCost;
+    const margin = (netProfit / (totalRevenue || 1)) * 100;
+
+    return (
+        <div className="h-full flex flex-col animate-in fade-in slide-in-from-bottom-4">
+             <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-800">Profitability Calculator</h2>
+                <div className="bg-teal-50 text-teal-700 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2">
+                    <Calculator className="w-4 h-4" /> Estimated
+                </div>
+             </div>
+
+             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                 <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-200">
+                    <h3 className="text-lg font-bold text-gray-700 mb-6 flex items-center gap-2"><Settings className="w-5 h-5"/> Cost Assumptions</h3>
+                    
+                    <div className="space-y-6">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-600 mb-2">Cost of Goods (COGS) %</label>
+                            <input 
+                                type="range" 
+                                min="0" max="100" 
+                                value={cogsPercent} 
+                                onChange={(e) => setCogsPercent(Number(e.target.value))}
+                                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-teal-600"
+                            />
+                            <div className="flex justify-between mt-2">
+                                <span className="text-xs text-gray-400">0%</span>
+                                <span className="text-sm font-bold text-teal-700">{cogsPercent}%</span>
+                                <span className="text-xs text-gray-400">100%</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-600 mb-2">Monthly Ad Spend ({currency})</label>
+                            <input 
+                                type="number" 
+                                value={adSpend}
+                                onChange={(e) => setAdSpend(Number(e.target.value))}
+                                className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-teal-500 focus:outline-none"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-600 mb-2">Fixed Costs (Rent, Salary) ({currency})</label>
+                            <input 
+                                type="number" 
+                                value={fixedCost}
+                                onChange={(e) => setFixedCost(Number(e.target.value))}
+                                className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-teal-500 focus:outline-none"
+                            />
+                        </div>
+                    </div>
+                 </div>
+
+                 <div className="lg:col-span-2 space-y-6">
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                         <div className="bg-gray-900 text-white p-6 rounded-3xl shadow-lg relative overflow-hidden">
+                             <div className="relative z-10">
+                                <p className="text-gray-400 text-sm font-medium uppercase tracking-wider mb-1">Estimated Net Profit</p>
+                                <p className="text-4xl font-extrabold">{formatCurrency(netProfit, currency)}</p>
+                                <p className={`text-sm mt-2 font-bold ${margin > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                    {margin.toFixed(1)}% Net Margin
+                                </p>
+                             </div>
+                             <div className="absolute right-0 bottom-0 opacity-10 transform translate-x-1/4 translate-y-1/4">
+                                 <DollarSign className="w-48 h-48" />
+                             </div>
+                         </div>
+
+                         <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm flex flex-col justify-center">
+                            <div className="flex justify-between items-center border-b border-gray-100 pb-3 mb-3">
+                                <span className="text-gray-500 font-medium">Gross Revenue</span>
+                                <span className="font-bold text-gray-800">{formatCurrency(totalRevenue, currency)}</span>
+                            </div>
+                            <div className="flex justify-between items-center border-b border-gray-100 pb-3 mb-3">
+                                <span className="text-rose-500 font-medium">- COGS (Est.)</span>
+                                <span className="font-bold text-rose-600">{formatCurrency(estimatedCOGS, currency)}</span>
+                            </div>
+                            <div className="flex justify-between items-center border-b border-gray-100 pb-3 mb-3">
+                                <span className="text-orange-500 font-medium">- Ads & Operations</span>
+                                <span className="font-bold text-orange-600">{formatCurrency(adSpend + fixedCost, currency)}</span>
+                            </div>
+                            <div className="flex justify-between items-center pt-2">
+                                <span className="text-teal-600 font-bold">Net Profit</span>
+                                <span className="font-bold text-teal-700 text-lg">{formatCurrency(netProfit, currency)}</span>
+                            </div>
+                         </div>
+                     </div>
+                 </div>
+             </div>
+        </div>
+    );
+};
+
+const CampaignView = ({ products, currency }) => {
+    const [campaigns, setCampaigns] = useState([]);
+    const [showModal, setShowModal] = useState(false);
+    
+    // Modal State
+    const [newCampName, setNewCampName] = useState('');
+    const [selectedIds, setSelectedIds] = useState([]);
+
+    const handleCreate = () => {
+        if (!newCampName) return;
+        const selectedProducts = products.filter(p => selectedIds.includes(p.id));
+        const baselineGmv = selectedProducts.reduce((sum, p) => sum + p.gmv, 0);
+        
+        const newCamp = {
+            id: Date.now(),
+            name: newCampName,
+            productCount: selectedIds.length,
+            baselineGmv,
+            status: 'Planned',
+            date: new Date().toLocaleDateString()
+        };
+        setCampaigns([...campaigns, newCamp]);
+        setShowModal(false);
+        setNewCampName('');
+        setSelectedIds([]);
+    };
+
+    const toggleSelection = (id) => {
+        if (selectedIds.includes(id)) setSelectedIds(prev => prev.filter(i => i !== id));
+        else setSelectedIds(prev => [...prev, id]);
+    };
+
+    return (
+        <div className="h-full flex flex-col animate-in fade-in slide-in-from-bottom-4 relative">
+             <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-800">Campaign Planner</h2>
+                <button 
+                    onClick={() => setShowModal(true)}
+                    className="bg-teal-600 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 hover:bg-teal-700 transition-colors shadow-sm"
+                >
+                    <Plus className="w-4 h-4" /> New Campaign
+                </button>
+             </div>
+
+             {/* Campaign List */}
+             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                 {campaigns.length === 0 ? (
+                     <div className="col-span-full py-12 text-center border-2 border-dashed border-gray-200 rounded-3xl">
+                         <Target className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                         <p className="text-gray-500 font-medium">No campaigns planned yet.</p>
+                         <p className="text-xs text-gray-400">Create a campaign to track product groups.</p>
+                     </div>
+                 ) : (
+                     campaigns.map(camp => (
+                         <div key={camp.id} className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                             <div className="flex justify-between items-start mb-4">
+                                 <div>
+                                     <h3 className="font-bold text-gray-800 text-lg">{camp.name}</h3>
+                                     <p className="text-xs text-gray-400 font-mono">Created: {camp.date}</p>
+                                 </div>
+                                 <span className="px-2 py-1 bg-blue-50 text-blue-600 text-xs font-bold rounded-lg">{camp.status}</span>
+                             </div>
+                             <div className="space-y-2">
+                                 <div className="flex justify-between text-sm">
+                                     <span className="text-gray-500">Products</span>
+                                     <span className="font-bold text-gray-800">{camp.productCount}</span>
+                                 </div>
+                                 <div className="flex justify-between text-sm">
+                                     <span className="text-gray-500">Baseline Revenue</span>
+                                     <span className="font-bold text-teal-600">{formatCurrency(camp.baselineGmv, currency)}</span>
+                                 </div>
+                             </div>
+                             <div className="mt-4 pt-4 border-t border-gray-100 flex gap-2">
+                                <button className="flex-1 py-2 text-xs font-bold text-gray-600 bg-gray-50 rounded-lg hover:bg-gray-100">Edit</button>
+                                <button className="flex-1 py-2 text-xs font-bold text-teal-600 bg-teal-50 rounded-lg hover:bg-teal-100">Track</button>
+                             </div>
+                         </div>
+                     ))
+                 )}
+             </div>
+
+             {/* Modal Overlay */}
+             {showModal && (
+                 <div className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
+                     <div className="bg-white rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col max-h-[80vh]">
+                         <div className="p-4 border-b border-gray-100 flex justify-between items-center">
+                             <h3 className="font-bold text-gray-800">New Campaign</h3>
+                             <button onClick={() => setShowModal(false)}><X className="w-5 h-5 text-gray-500" /></button>
+                         </div>
+                         <div className="p-4 space-y-4 overflow-y-auto flex-1">
+                             <div>
+                                 <label className="block text-sm font-medium text-gray-700 mb-1">Campaign Name</label>
+                                 <input 
+                                     type="text" 
+                                     value={newCampName} 
+                                     onChange={(e) => setNewCampName(e.target.value)}
+                                     placeholder="e.g. 11.11 Mega Sale"
+                                     className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none"
+                                 />
+                             </div>
+                             <div>
+                                 <label className="block text-sm font-medium text-gray-700 mb-2">Select Products</label>
+                                 <div className="max-h-48 overflow-y-auto border border-gray-100 rounded-lg divide-y divide-gray-100">
+                                     {products.map(p => (
+                                         <div 
+                                            key={p.id} 
+                                            onClick={() => toggleSelection(p.id)}
+                                            className={`p-2 flex items-center justify-between cursor-pointer hover:bg-gray-50 ${selectedIds.includes(p.id) ? 'bg-teal-50' : ''}`}
+                                         >
+                                             <span className="text-sm truncate w-2/3">{p.name}</span>
+                                             {selectedIds.includes(p.id) && <CheckCircle2 className="w-4 h-4 text-teal-600" />}
+                                         </div>
+                                     ))}
+                                 </div>
+                                 <p className="text-xs text-right text-gray-400 mt-1">{selectedIds.length} selected</p>
+                             </div>
+                         </div>
+                         <div className="p-4 border-t border-gray-100 bg-gray-50 flex justify-end">
+                             <button 
+                                onClick={handleCreate}
+                                className="px-6 py-2 bg-teal-600 text-white rounded-lg font-bold text-sm hover:bg-teal-700"
+                             >
+                                 Create Plan
+                             </button>
+                         </div>
+                     </div>
+                 </div>
+             )}
+        </div>
+    );
 };
 
 const Sidebar = ({ activeView, setActiveView, smartInsights, fileInputRef, handleFileUpload }) => (
@@ -238,6 +567,24 @@ const Sidebar = ({ activeView, setActiveView, smartInsights, fileInputRef, handl
         label="Inventory" 
         active={activeView === 'inventory'} 
         onClick={() => setActiveView('inventory')} 
+      />
+      <NavButton 
+        icon={Video} 
+        label="Live & Video" 
+        active={activeView === 'media'} 
+        onClick={() => setActiveView('media')} 
+      />
+      <NavButton 
+        icon={Calendar} 
+        label="Campaigns" 
+        active={activeView === 'campaigns'} 
+        onClick={() => setActiveView('campaigns')} 
+      />
+      <NavButton 
+        icon={Wallet} 
+        label="Finance" 
+        active={activeView === 'finance'} 
+        onClick={() => setActiveView('finance')} 
       />
       <NavButton 
         icon={FileText} 
@@ -294,7 +641,7 @@ const Sidebar = ({ activeView, setActiveView, smartInsights, fileInputRef, handl
 const DashboardView = ({ topProduct, setSelectedProduct, currency, channelData, totalChannelGmv, summary, timePeriod, setTimePeriod, platformFilter, setPlatformFilter, availablePlatforms }) => (
   <>
     <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4 animate-in fade-in slide-in-from-top-2">
-       <div className="flex bg-white/50 p-1 rounded-xl border border-white/60 shadow-sm">
+       <div className="flex bg-white/80 backdrop-blur-md p-1 rounded-xl border border-white/60 shadow-sm">
           {['All Time', 'Last Import'].map(period => (
               <button
                   key={period}
@@ -311,7 +658,7 @@ const DashboardView = ({ topProduct, setSelectedProduct, currency, channelData, 
           <select 
               value={platformFilter}
               onChange={(e) => setPlatformFilter(e.target.value)}
-              className="bg-white/50 border-none text-sm font-semibold text-gray-700 focus:ring-0 cursor-pointer hover:bg-white/80 rounded-lg px-2 py-1 transition-colors"
+              className="bg-white/80 backdrop-blur-md border-none text-sm font-semibold text-gray-700 focus:ring-0 cursor-pointer hover:bg-white/90 rounded-lg px-2 py-1 transition-colors"
           >
               {availablePlatforms.map(p => <option key={p} value={p}>{p} Platform</option>)}
           </select>
@@ -436,6 +783,7 @@ const DashboardView = ({ topProduct, setSelectedProduct, currency, channelData, 
         <div className="flex items-center justify-between mb-6">
           <h3 className="font-bold text-gray-800 text-lg">Inventory Snapshot</h3>
           <button 
+              onClick={() => setSelectedProduct(topProduct)}
               className="text-sm font-semibold text-teal-600 hover:text-teal-700 hover:underline flex items-center gap-1"
           >
               View full list <ArrowUpRight className="w-4 h-4" />
@@ -492,18 +840,21 @@ const DashboardView = ({ topProduct, setSelectedProduct, currency, channelData, 
           value={formatCurrency(summary.totalGmv, currency)} 
           icon={DollarSign}
           colorClass="from-purple-100 to-purple-50 text-purple-600"
+          info="Total Gross Merchandise Value across all channels before deductions."
         />
         <StatCard 
           title="Avg Order Value" 
           value={formatCurrency(summary.avgOrderValue, currency)} 
           icon={ShoppingBag}
           colorClass="from-pink-100 to-pink-50 text-pink-600"
+          info="Average revenue generated per individual order."
         />
         <StatCard 
           title="Conversion Rate" 
           value={summary.conversionRate} 
           icon={MousePointer2}
           colorClass="from-teal-100 to-teal-50 text-teal-600"
+          info="Percentage of visitors who made a purchase."
         />
       </div>
     </div>
@@ -949,7 +1300,7 @@ const SettingsView = ({ settings, setSettings, uploadedFiles, clearData, addNoti
   </div>
 );
 
-// --- Main App ---
+// --- MAIN APP ---
 
 export default function App() {
   const [activeView, setActiveView] = useState('dashboard'); 
@@ -1381,17 +1732,17 @@ export default function App() {
             />
 
             <div className="flex-1 p-6 md:p-8 overflow-y-auto overflow-x-hidden scrollbar-hide relative">
-              <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4 sticky top-0 z-20 bg-gradient-to-b from-white/0 via-white/0 to-transparent pb-4">
+              <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4 sticky top-0 z-20 bg-white/80 backdrop-blur-md rounded-xl p-4 shadow-sm border border-white/50 transition-all">
                 <div>
                   <p className="text-teal-600 font-bold text-sm mb-1 tracking-wide uppercase opacity-80">
-                    {activeView === 'dashboard' ? 'Overview' : activeView === 'inventory' ? 'Management' : activeView === 'reports' ? 'Documentation' : 'System'}
+                    {activeView === 'dashboard' ? 'Overview' : activeView === 'inventory' ? 'Management' : activeView === 'reports' ? 'Documentation' : activeView === 'settings' ? 'System' : 'Module'}
                   </p>
                   <h2 className="text-3xl md:text-4xl font-extrabold text-gray-800 tracking-tight drop-shadow-sm capitalize">
-                    {activeView === 'dashboard' ? 'Shop Analytics' : activeView === 'inventory' ? 'Product Inventory' : activeView === 'reports' ? 'Performance Reports' : 'Settings'}
+                    {activeView === 'dashboard' ? 'Shop Analytics' : activeView === 'inventory' ? 'Product Inventory' : activeView === 'reports' ? 'Performance Reports' : activeView === 'settings' ? 'Settings' : activeView}
                   </h2>
                 </div>
                 <div className="flex items-center gap-4 self-end md:self-auto">
-                  <div className="flex items-center gap-3 pl-4 border-l-2 border-white/50">
+                  <div className="flex items-center gap-3 pl-4 border-l-2 border-gray-200">
                     <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold border-2 border-white shadow-sm ring-2 ring-indigo-50">
                         {typeof settings.userName === 'string' ? settings.userName.charAt(0) : 'S'}
                     </div>
@@ -1432,6 +1783,9 @@ export default function App() {
                     currency={settings.currency}
                 />
               )}
+              {activeView === 'media' && <MediaView products={processedProducts} currency={settings.currency} />}
+              {activeView === 'campaigns' && <CampaignView products={products} currency={settings.currency} />}
+              {activeView === 'finance' && <FinanceView products={processedProducts} currency={settings.currency} />}
               {activeView === 'reports' && (
                 <ReportView 
                     settings={settings} 
