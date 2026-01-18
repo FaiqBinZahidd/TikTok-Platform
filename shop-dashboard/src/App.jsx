@@ -31,13 +31,25 @@ import {
   Database,
   Clock,
   Smartphone,
-  Calendar,
+  Calendar as CalendarIcon,
   Wallet,
   Plus,
   Target,
   Calculator,
   Info,
-  HelpCircle
+  HelpCircle,
+  ExternalLink,
+  Link as LinkIcon,
+  User,
+  BookOpen,
+  LogOut,
+  Users,
+  ChevronLeft,
+  ChevronRight,
+  LogIn,
+  ArrowRight,
+  Lock,
+  Key
 } from 'lucide-react';
 
 // --- Global Helper Functions ---
@@ -55,8 +67,8 @@ const formatCurrency = (amount, currencySymbol = '฿') => {
 
 const getBadgeColor = (category) => {
   switch(category) {
-      case 'A': return 'bg-purple-100 text-purple-700 border-purple-200';
-      case 'B': return 'bg-blue-50 text-blue-600 border-blue-200';
+      case 'A': return 'bg-violet-100 text-violet-700 border-violet-200';
+      case 'B': return 'bg-slate-100 text-slate-600 border-slate-200';
       default: return 'bg-gray-50 text-gray-500 border-gray-200';
   }
 };
@@ -66,10 +78,10 @@ const getBadgeColor = (category) => {
 const NavButton = ({ icon: Icon, label, active, onClick }) => (
   <button 
     onClick={onClick}
-    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-200 
+    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all duration-200 
     ${active 
-      ? 'bg-teal-600 text-white shadow-md shadow-teal-200 transform scale-[1.02]' 
-      : 'text-gray-600 hover:bg-white/60 hover:text-teal-700'}`}
+      ? 'bg-violet-600 text-white shadow-md shadow-violet-200 transform translate-x-1' 
+      : 'text-slate-500 hover:bg-slate-100 hover:text-violet-700'}`}
   >
     <Icon className={`w-5 h-5 ${active ? 'text-white' : ''}`} />
     {label}
@@ -77,28 +89,28 @@ const NavButton = ({ icon: Icon, label, active, onClick }) => (
 );
 
 const StatCard = ({ title, value, icon: Icon, colorClass, subText, info }) => (
-  <div className={`bg-gradient-to-br ${colorClass} rounded-3xl p-5 shadow-sm border border-white/50 backdrop-blur-sm hover:shadow-md transition-shadow group relative`}>
+  <div className={`bg-white rounded-xl p-5 shadow-sm border border-slate-200 hover:border-violet-300 hover:shadow-md transition-all group relative animate-in fade-in zoom-in duration-300`}>
     <div className="flex justify-between items-start">
         <div>
             <div className="flex items-center gap-1 mb-1">
-                <p className={`text-[10px] font-bold uppercase tracking-wider opacity-70`}>{title}</p>
+                <p className={`text-[10px] font-bold uppercase tracking-wider text-slate-400`}>{title}</p>
                 {info && (
                     <div className="group/tooltip relative">
-                        <HelpCircle className="w-3 h-3 opacity-50 cursor-help" />
-                        <div className="absolute left-0 top-6 w-48 p-2 bg-gray-800 text-white text-[10px] rounded-lg opacity-0 group-hover/tooltip:opacity-100 transition-opacity z-50 pointer-events-none">
+                        <HelpCircle className="w-3 h-3 text-slate-400 cursor-help" />
+                        <div className="absolute left-0 top-6 w-48 p-2 bg-slate-800 text-white text-[10px] rounded-lg opacity-0 group-hover/tooltip:opacity-100 transition-opacity z-50 pointer-events-none shadow-xl">
                             {info}
                         </div>
                     </div>
                 )}
             </div>
-            <p className="text-2xl lg:text-3xl font-bold text-gray-800">{value}</p>
+            <p className="text-2xl lg:text-3xl font-bold text-slate-800 tracking-tight">{value}</p>
         </div>
-        <div className="w-10 h-10 bg-white/80 rounded-full flex items-center justify-center shadow-sm backdrop-blur-sm">
-            <Icon className="w-5 h-5 opacity-80" />
+        <div className={`w-10 h-10 rounded-lg flex items-center justify-center shadow-sm ${colorClass}`}>
+            <Icon className="w-5 h-5" />
         </div>
     </div>
     {subText && (
-      <div className="mt-3 text-xs font-medium opacity-80 flex items-center gap-1">
+      <div className="mt-3 text-xs font-medium text-slate-500 flex items-center gap-1">
           {subText}
       </div>
     )}
@@ -110,47 +122,47 @@ const ProductDetailModal = ({ product, onClose, currency }) => {
   const maxGmv = Math.max(product.shopGmv, product.videoGmv, product.liveGmv) || 1;
 
   return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm" onClick={onClose}>
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-3xl overflow-hidden animate-in fade-in zoom-in duration-200 flex flex-col max-h-[90vh]" onClick={e => e.stopPropagation()}>
-              <div className="p-6 border-b border-gray-100 flex justify-between items-start bg-gray-50/50 flex-shrink-0">
+      <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" onClick={onClose}>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl overflow-hidden animate-in fade-in zoom-in duration-200 flex flex-col max-h-[90vh]" onClick={e => e.stopPropagation()}>
+              <div className="p-6 border-b border-slate-100 flex justify-between items-start bg-slate-50/50 flex-shrink-0">
                   <div>
                       <div className="flex items-center gap-2 mb-2">
                            <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold border ${getBadgeColor(product.abcCategory)}`}>
                               Class {product.abcCategory}
                           </span>
-                           <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold ${product.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                           <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold ${product.status === 'Active' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'}`}>
                               {product.status}
                           </span>
-                          <span className="text-xs text-gray-400 font-mono flex items-center gap-1">
+                          <span className="text-xs text-slate-400 font-mono flex items-center gap-1">
                               <Database className="w-3 h-3" /> {product.id}
                           </span>
                       </div>
-                      <h2 className="text-xl font-bold text-gray-800 leading-tight mb-2">{product.name}</h2>
-                      <div className="flex flex-wrap gap-3 text-xs text-gray-500">
-                         <span className="flex items-center gap-1 bg-white px-2 py-1 rounded border border-gray-200 shadow-sm"><Smartphone className="w-3 h-3 text-teal-600" /> Platform: <strong>{product.platform}</strong></span>
-                         <span className="flex items-center gap-1 bg-white px-2 py-1 rounded border border-gray-200 shadow-sm"><FileText className="w-3 h-3 text-indigo-600" /> Source: {product.sourceFile}</span>
+                      <h2 className="text-xl font-bold text-slate-800 leading-tight mb-2">{product.name}</h2>
+                      <div className="flex flex-wrap gap-3 text-xs text-slate-500">
+                         <span className="flex items-center gap-1 bg-white px-2 py-1 rounded border border-slate-200 shadow-sm"><Smartphone className="w-3 h-3 text-violet-600" /> Platform: <strong>{product.platform}</strong></span>
+                         <span className="flex items-center gap-1 bg-white px-2 py-1 rounded border border-slate-200 shadow-sm"><FileText className="w-3 h-3 text-indigo-600" /> Source: {product.sourceFile}</span>
                       </div>
                   </div>
-                  <button onClick={onClose} className="p-2 hover:bg-gray-200 rounded-full transition-colors">
-                      <X className="w-5 h-5 text-gray-500" />
+                  <button onClick={onClose} className="p-2 hover:bg-slate-200 rounded-lg transition-colors">
+                      <X className="w-5 h-5 text-slate-500" />
                   </button>
               </div>
               
               <div className="p-6 overflow-y-auto">
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                      <div className="p-4 bg-teal-50 rounded-2xl border border-teal-100 text-center">
-                          <p className="text-xs text-teal-600 font-bold uppercase mb-1">Total Sales</p>
-                          <p className="text-xl md:text-2xl font-bold text-teal-800">{formatCurrency(product.gmv, currency)}</p>
+                      <div className="p-4 bg-violet-50 rounded-xl border border-violet-100 text-center">
+                          <p className="text-xs text-violet-600 font-bold uppercase mb-1">Total Sales</p>
+                          <p className="text-xl md:text-2xl font-bold text-violet-800">{formatCurrency(product.gmv, currency)}</p>
                       </div>
-                      <div className="p-4 bg-indigo-50 rounded-2xl border border-indigo-100 text-center">
-                          <p className="text-xs text-indigo-600 font-bold uppercase mb-1">Items Sold</p>
-                          <p className="text-xl md:text-2xl font-bold text-indigo-800">{product.itemsSold}</p>
+                      <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 text-center">
+                          <p className="text-xs text-slate-600 font-bold uppercase mb-1">Items Sold</p>
+                          <p className="text-xl md:text-2xl font-bold text-slate-800">{product.itemsSold}</p>
                       </div>
-                      <div className="p-4 bg-rose-50 rounded-2xl border border-rose-100 text-center">
+                      <div className="p-4 bg-rose-50 rounded-xl border border-rose-100 text-center">
                           <p className="text-xs text-rose-600 font-bold uppercase mb-1">Conversion</p>
                           <p className="text-xl md:text-2xl font-bold text-rose-800">{product.cvr}</p>
                       </div>
-                      <div className="p-4 bg-amber-50 rounded-2xl border border-amber-100 text-center">
+                      <div className="p-4 bg-amber-50 rounded-xl border border-amber-100 text-center">
                           <p className="text-xs text-amber-600 font-bold uppercase mb-1">Orders</p>
                           <p className="text-xl md:text-2xl font-bold text-amber-800">{product.orders}</p>
                       </div>
@@ -158,24 +170,24 @@ const ProductDetailModal = ({ product, onClose, currency }) => {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                       <div>
-                          <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide mb-4 flex items-center gap-2">
+                          <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wide mb-4 flex items-center gap-2">
                               <DollarSign className="w-4 h-4" /> GMV Source Analysis
                           </h3>
                           <div className="space-y-4">
                               {[
-                              { name: 'Shop Tab', gmv: product.shopGmv, views: product.shopViews, icon: ShoppingBag, color: 'teal' },
+                              { name: 'Shop Tab', gmv: product.shopGmv, views: product.shopViews, icon: ShoppingBag, color: 'violet' },
                               { name: 'Video Content', gmv: product.videoGmv, views: product.videoViews, icon: Video, color: 'indigo' },
                               { name: 'Live Stream', gmv: product.liveGmv, views: product.liveViews, icon: Eye, color: 'rose' },
                               ].map((channel, i) => (
-                              <div key={i} className="bg-gray-50 rounded-xl p-3 border border-gray-100">
+                              <div key={i} className="bg-slate-50 rounded-lg p-3 border border-slate-200">
                                   <div className="flex justify-between text-sm mb-2">
-                                      <span className="flex items-center gap-2 text-gray-700 font-bold"><channel.icon className={`w-4 h-4 text-${channel.color}-600`} /> {channel.name}</span>
-                                      <span className="font-bold text-gray-900">{formatCurrency(channel.gmv, currency)}</span>
+                                      <span className="flex items-center gap-2 text-slate-700 font-bold"><channel.icon className={`w-4 h-4 text-${channel.color}-600`} /> {channel.name}</span>
+                                      <span className="font-bold text-slate-900">{formatCurrency(channel.gmv, currency)}</span>
                                   </div>
-                                  <div className="h-2 bg-gray-200 rounded-full overflow-hidden mb-2">
+                                  <div className="h-2 bg-slate-200 rounded-full overflow-hidden mb-2">
                                       <div style={{width: `${(channel.gmv / (maxGmv || 1)) * 100}%`}} className={`h-full bg-${channel.color}-500 rounded-full`}></div>
                                   </div>
-                                  <div className="flex justify-between text-xs text-gray-500">
+                                  <div className="flex justify-between text-xs text-slate-500">
                                       <span>Contribution: <strong>{(channel.gmv > 0 ? ((channel.gmv / (product.gmv || 1)) * 100).toFixed(1) : 0)}%</strong></span>
                                   </div>
                               </div>
@@ -183,33 +195,33 @@ const ProductDetailModal = ({ product, onClose, currency }) => {
                           </div>
                       </div>
                       <div>
-                          <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide mb-4 flex items-center gap-2">
+                          <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wide mb-4 flex items-center gap-2">
                               <MousePointer2 className="w-4 h-4" /> Traffic & Conversion
                           </h3>
-                          <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-6">
-                              <div className="relative pl-8 border-l-2 border-gray-200 pb-6">
-                                  <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-gray-300 border-2 border-white"></div>
-                                  <p className="text-xs text-gray-500 uppercase font-bold mb-1">Total Views</p>
-                                  <p className="text-lg font-bold text-gray-800">
+                          <div className="bg-white border border-slate-200 rounded-xl p-4 space-y-6">
+                              <div className="relative pl-8 border-l-2 border-slate-200 pb-6">
+                                  <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-slate-300 border-2 border-white"></div>
+                                  <p className="text-xs text-slate-500 uppercase font-bold mb-1">Total Views</p>
+                                  <p className="text-lg font-bold text-slate-800">
                                       {(product.shopViews + (product.videoViews || 0) + (product.liveViews || 0)).toLocaleString()}
                                   </p>
                               </div>
-                              <div className="relative pl-8 border-l-2 border-gray-200 pb-6">
+                              <div className="relative pl-8 border-l-2 border-slate-200 pb-6">
                                   <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-blue-300 border-2 border-white"></div>
-                                  <p className="text-xs text-gray-500 uppercase font-bold mb-1">CTR (Click Through)</p>
+                                  <p className="text-xs text-slate-500 uppercase font-bold mb-1">CTR (Click Through)</p>
                                   <p className="text-lg font-bold text-blue-600">{product.ctr}</p>
                               </div>
-                              <div className="relative pl-8 border-l-2 border-teal-500">
-                                  <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-teal-500 border-2 border-white shadow-sm"></div>
-                                  <p className="text-xs text-gray-500 uppercase font-bold mb-1">Final Conversion</p>
-                                  <p className="text-xl font-bold text-teal-600">{product.cvr}</p>
+                              <div className="relative pl-8 border-l-2 border-emerald-500">
+                                  <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white shadow-sm"></div>
+                                  <p className="text-xs text-slate-500 uppercase font-bold mb-1">Final Conversion</p>
+                                  <p className="text-xl font-bold text-emerald-600">{product.cvr}</p>
                               </div>
                           </div>
                       </div>
                   </div>
               </div>
-              <div className="p-4 border-t border-gray-100 bg-gray-50 flex justify-end flex-shrink-0">
-                  <button onClick={onClose} className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50">
+              <div className="p-4 border-t border-slate-100 bg-slate-50 flex justify-end flex-shrink-0">
+                  <button onClick={onClose} className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50">
                       Close Details
                   </button>
               </div>
@@ -236,34 +248,34 @@ const MediaView = ({ products, currency }) => {
 
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
-            <h2 className="text-2xl font-bold text-gray-800">Media Performance</h2>
+            <h2 className="text-2xl font-bold text-slate-800 tracking-tight">Media Performance</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-gradient-to-br from-indigo-50 to-white p-6 rounded-3xl border border-indigo-100 shadow-sm">
+                <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
                     <div className="flex items-center gap-3 mb-6">
-                        <div className="p-3 bg-indigo-100 rounded-xl">
+                        <div className="p-3 bg-indigo-50 rounded-lg">
                             <Video className="w-6 h-6 text-indigo-600" />
                         </div>
                         <div>
-                            <h3 className="font-bold text-indigo-900 text-lg">Short Video</h3>
-                            <p className="text-xs text-indigo-500">Content Performance</p>
+                            <h3 className="font-bold text-indigo-950 text-lg">Short Video</h3>
+                            <p className="text-xs text-indigo-500 font-medium uppercase">Content Performance</p>
                         </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4 mb-6">
-                        <div className="bg-white p-3 rounded-xl border border-indigo-50">
-                            <p className="text-xs text-gray-400 font-bold uppercase">Revenue</p>
+                        <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                            <p className="text-xs text-slate-400 font-bold uppercase">Revenue</p>
                             <p className="text-xl font-bold text-indigo-700">{formatCurrency(videoStats.gmv, currency)}</p>
                         </div>
-                        <div className="bg-white p-3 rounded-xl border border-indigo-50">
-                            <p className="text-xs text-gray-400 font-bold uppercase">Total Views</p>
-                            <p className="text-xl font-bold text-gray-700">{videoStats.views.toLocaleString()}</p>
+                        <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                            <p className="text-xs text-slate-400 font-bold uppercase">Total Views</p>
+                            <p className="text-xl font-bold text-slate-700">{videoStats.views.toLocaleString()}</p>
                         </div>
                     </div>
                     <div>
-                        <h4 className="text-sm font-bold text-gray-600 mb-3 uppercase tracking-wider">Top Content Products</h4>
+                        <h4 className="text-sm font-bold text-slate-600 mb-3 uppercase tracking-wider">Top Content Products</h4>
                         <div className="space-y-2">
                             {topVideos.map(p => (
-                                <div key={p.id} className="flex justify-between items-center bg-white p-2 rounded-lg border border-gray-100 text-sm">
-                                    <span className="truncate w-1/2">{p.name}</span>
+                                <div key={p.id} className="flex justify-between items-center bg-slate-50 p-2 rounded-lg border border-slate-100 text-sm">
+                                    <span className="truncate w-1/2 font-medium">{p.name}</span>
                                     <span className="font-mono font-bold text-indigo-600">{formatCurrency(p.videoGmv, currency)}</span>
                                 </div>
                             ))}
@@ -271,32 +283,32 @@ const MediaView = ({ products, currency }) => {
                     </div>
                 </div>
 
-                <div className="bg-gradient-to-br from-rose-50 to-white p-6 rounded-3xl border border-rose-100 shadow-sm">
+                <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
                     <div className="flex items-center gap-3 mb-6">
-                        <div className="p-3 bg-rose-100 rounded-xl">
+                        <div className="p-3 bg-rose-50 rounded-lg">
                             <Eye className="w-6 h-6 text-rose-600" />
                         </div>
                         <div>
-                            <h3 className="font-bold text-rose-900 text-lg">Live Streaming</h3>
-                            <p className="text-xs text-rose-500">Real-time Sales</p>
+                            <h3 className="font-bold text-rose-950 text-lg">Live Streaming</h3>
+                            <p className="text-xs text-rose-500 font-medium uppercase">Real-time Sales</p>
                         </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4 mb-6">
-                        <div className="bg-white p-3 rounded-xl border border-rose-50">
-                            <p className="text-xs text-gray-400 font-bold uppercase">Revenue</p>
+                        <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                            <p className="text-xs text-slate-400 font-bold uppercase">Revenue</p>
                             <p className="text-xl font-bold text-rose-700">{formatCurrency(liveStats.gmv, currency)}</p>
                         </div>
-                        <div className="bg-white p-3 rounded-xl border border-rose-50">
-                            <p className="text-xs text-gray-400 font-bold uppercase">Total Views</p>
-                            <p className="text-xl font-bold text-gray-700">{liveStats.views.toLocaleString()}</p>
+                        <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                            <p className="text-xs text-slate-400 font-bold uppercase">Total Views</p>
+                            <p className="text-xl font-bold text-slate-700">{liveStats.views.toLocaleString()}</p>
                         </div>
                     </div>
                     <div>
-                        <h4 className="text-sm font-bold text-gray-600 mb-3 uppercase tracking-wider">Top Live Products</h4>
+                        <h4 className="text-sm font-bold text-slate-600 mb-3 uppercase tracking-wider">Top Live Products</h4>
                         <div className="space-y-2">
                             {topLives.map(p => (
-                                <div key={p.id} className="flex justify-between items-center bg-white p-2 rounded-lg border border-gray-100 text-sm">
-                                    <span className="truncate w-1/2">{p.name}</span>
+                                <div key={p.id} className="flex justify-between items-center bg-slate-50 p-2 rounded-lg border border-slate-100 text-sm">
+                                    <span className="truncate w-1/2 font-medium">{p.name}</span>
                                     <span className="font-mono font-bold text-rose-600">{formatCurrency(p.liveGmv, currency)}</span>
                                 </div>
                             ))}
@@ -322,50 +334,50 @@ const FinanceView = ({ products, currency }) => {
     return (
         <div className="h-full flex flex-col animate-in fade-in slide-in-from-bottom-4">
              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-800">Profitability Calculator</h2>
-                <div className="bg-teal-50 text-teal-700 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2">
+                <h2 className="text-2xl font-bold text-slate-800 tracking-tight">Profitability Calculator</h2>
+                <div className="bg-violet-50 text-violet-700 px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2">
                     <Calculator className="w-4 h-4" /> Estimated
                 </div>
              </div>
 
              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                 <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-200">
-                    <h3 className="text-lg font-bold text-gray-700 mb-6 flex items-center gap-2"><Settings className="w-5 h-5"/> Cost Assumptions</h3>
+                 <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                    <h3 className="text-lg font-bold text-slate-700 mb-6 flex items-center gap-2"><Settings className="w-5 h-5"/> Cost Assumptions</h3>
                     
                     <div className="space-y-6">
                         <div>
-                            <label className="block text-sm font-medium text-gray-600 mb-2">Cost of Goods (COGS) %</label>
+                            <label className="block text-sm font-medium text-slate-600 mb-2">Cost of Goods (COGS) %</label>
                             <input 
                                 type="range" 
                                 min="0" max="100" 
                                 value={cogsPercent} 
                                 onChange={(e) => setCogsPercent(Number(e.target.value))}
-                                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-teal-600"
+                                className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-violet-600"
                             />
                             <div className="flex justify-between mt-2">
-                                <span className="text-xs text-gray-400">0%</span>
-                                <span className="text-sm font-bold text-teal-700">{cogsPercent}%</span>
-                                <span className="text-xs text-gray-400">100%</span>
+                                <span className="text-xs text-slate-400">0%</span>
+                                <span className="text-sm font-bold text-violet-700">{cogsPercent}%</span>
+                                <span className="text-xs text-slate-400">100%</span>
                             </div>
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-600 mb-2">Monthly Ad Spend ({currency})</label>
+                            <label className="block text-sm font-medium text-slate-600 mb-2">Monthly Ad Spend ({currency})</label>
                             <input 
                                 type="number" 
                                 value={adSpend}
                                 onChange={(e) => setAdSpend(Number(e.target.value))}
-                                className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-teal-500 focus:outline-none"
+                                className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-violet-500 focus:outline-none"
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-600 mb-2">Fixed Costs (Rent, Salary) ({currency})</label>
+                            <label className="block text-sm font-medium text-slate-600 mb-2">Fixed Costs (Rent, Salary) ({currency})</label>
                             <input 
                                 type="number" 
                                 value={fixedCost}
                                 onChange={(e) => setFixedCost(Number(e.target.value))}
-                                className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-teal-500 focus:outline-none"
+                                className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-violet-500 focus:outline-none"
                             />
                         </div>
                     </div>
@@ -373,11 +385,11 @@ const FinanceView = ({ products, currency }) => {
 
                  <div className="lg:col-span-2 space-y-6">
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                         <div className="bg-gray-900 text-white p-6 rounded-3xl shadow-lg relative overflow-hidden">
+                         <div className="bg-slate-900 text-white p-6 rounded-xl shadow-lg relative overflow-hidden">
                              <div className="relative z-10">
-                                <p className="text-gray-400 text-sm font-medium uppercase tracking-wider mb-1">Estimated Net Profit</p>
-                                <p className="text-4xl font-extrabold">{formatCurrency(netProfit, currency)}</p>
-                                <p className={`text-sm mt-2 font-bold ${margin > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                <p className="text-slate-400 text-sm font-medium uppercase tracking-wider mb-1">Estimated Net Profit</p>
+                                <p className="text-4xl font-extrabold tracking-tight">{formatCurrency(netProfit, currency)}</p>
+                                <p className={`text-sm mt-2 font-bold ${margin > 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                                     {margin.toFixed(1)}% Net Margin
                                 </p>
                              </div>
@@ -386,22 +398,22 @@ const FinanceView = ({ products, currency }) => {
                              </div>
                          </div>
 
-                         <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm flex flex-col justify-center">
-                            <div className="flex justify-between items-center border-b border-gray-100 pb-3 mb-3">
-                                <span className="text-gray-500 font-medium">Gross Revenue</span>
-                                <span className="font-bold text-gray-800">{formatCurrency(totalRevenue, currency)}</span>
+                         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-center">
+                            <div className="flex justify-between items-center border-b border-slate-100 pb-3 mb-3">
+                                <span className="text-slate-500 font-medium">Gross Revenue</span>
+                                <span className="font-bold text-slate-800">{formatCurrency(totalRevenue, currency)}</span>
                             </div>
-                            <div className="flex justify-between items-center border-b border-gray-100 pb-3 mb-3">
+                            <div className="flex justify-between items-center border-b border-slate-100 pb-3 mb-3">
                                 <span className="text-rose-500 font-medium">- COGS (Est.)</span>
                                 <span className="font-bold text-rose-600">{formatCurrency(estimatedCOGS, currency)}</span>
                             </div>
-                            <div className="flex justify-between items-center border-b border-gray-100 pb-3 mb-3">
+                            <div className="flex justify-between items-center border-b border-slate-100 pb-3 mb-3">
                                 <span className="text-orange-500 font-medium">- Ads & Operations</span>
                                 <span className="font-bold text-orange-600">{formatCurrency(adSpend + fixedCost, currency)}</span>
                             </div>
                             <div className="flex justify-between items-center pt-2">
-                                <span className="text-teal-600 font-bold">Net Profit</span>
-                                <span className="font-bold text-teal-700 text-lg">{formatCurrency(netProfit, currency)}</span>
+                                <span className="text-violet-600 font-bold">Net Profit</span>
+                                <span className="font-bold text-violet-700 text-lg">{formatCurrency(netProfit, currency)}</span>
                             </div>
                          </div>
                      </div>
@@ -411,12 +423,13 @@ const FinanceView = ({ products, currency }) => {
     );
 };
 
-const CampaignView = ({ products, currency }) => {
-    const [campaigns, setCampaigns] = useState([]);
+const CampaignView = ({ products, currency, campaigns, setCampaigns }) => {
     const [showModal, setShowModal] = useState(false);
     
     // Modal State
     const [newCampName, setNewCampName] = useState('');
+    const [discountPercent, setDiscountPercent] = useState(0);
+    const [adUrl, setAdUrl] = useState('');
     const [selectedIds, setSelectedIds] = useState([]);
 
     const handleCreate = () => {
@@ -424,18 +437,33 @@ const CampaignView = ({ products, currency }) => {
         const selectedProducts = products.filter(p => selectedIds.includes(p.id));
         const baselineGmv = selectedProducts.reduce((sum, p) => sum + p.gmv, 0);
         
+        // Simple Projection Logic: Assume 10% lift for every 5% discount
+        const liftFactor = 1 + ((discountPercent / 5) * 0.1); 
+        const projectedRevenue = baselineGmv * (1 - (discountPercent/100)) * liftFactor; 
+
         const newCamp = {
             id: Date.now(),
             name: newCampName,
             productCount: selectedIds.length,
             baselineGmv,
+            projectedRevenue,
+            discountPercent,
+            adUrl,
             status: 'Planned',
             date: new Date().toLocaleDateString()
         };
         setCampaigns([...campaigns, newCamp]);
         setShowModal(false);
         setNewCampName('');
+        setDiscountPercent(0);
+        setAdUrl('');
         setSelectedIds([]);
+    };
+
+    const deleteCampaign = (id) => {
+        if(window.confirm('Delete this campaign plan?')) {
+            setCampaigns(prev => prev.filter(c => c.id !== id));
+        }
     };
 
     const toggleSelection = (id) => {
@@ -446,10 +474,10 @@ const CampaignView = ({ products, currency }) => {
     return (
         <div className="h-full flex flex-col animate-in fade-in slide-in-from-bottom-4 relative">
              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-800">Campaign Planner</h2>
+                <h2 className="text-2xl font-bold text-slate-800 tracking-tight">Campaign Planner</h2>
                 <button 
                     onClick={() => setShowModal(true)}
-                    className="bg-teal-600 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 hover:bg-teal-700 transition-colors shadow-sm"
+                    className="bg-violet-600 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 hover:bg-violet-700 transition-colors shadow-sm"
                 >
                     <Plus className="w-4 h-4" /> New Campaign
                 </button>
@@ -458,34 +486,47 @@ const CampaignView = ({ products, currency }) => {
              {/* Campaign List */}
              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                  {campaigns.length === 0 ? (
-                     <div className="col-span-full py-12 text-center border-2 border-dashed border-gray-200 rounded-3xl">
-                         <Target className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                         <p className="text-gray-500 font-medium">No campaigns planned yet.</p>
-                         <p className="text-xs text-gray-400">Create a campaign to track product groups.</p>
+                     <div className="col-span-full py-12 text-center border-2 border-dashed border-slate-200 rounded-xl">
+                         <Target className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                         <p className="text-slate-500 font-medium">No campaigns planned yet.</p>
+                         <p className="text-xs text-slate-400">Create a campaign to track product groups.</p>
                      </div>
                  ) : (
                      campaigns.map(camp => (
-                         <div key={camp.id} className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-                             <div className="flex justify-between items-start mb-4">
+                         <div key={camp.id} className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow relative group">
+                             <button 
+                                onClick={() => deleteCampaign(camp.id)}
+                                className="absolute top-4 right-4 text-slate-300 hover:text-red-500 transition-colors"
+                             >
+                                <Trash2 className="w-4 h-4" />
+                             </button>
+                             <div className="flex justify-between items-start mb-4 pr-6">
                                  <div>
-                                     <h3 className="font-bold text-gray-800 text-lg">{camp.name}</h3>
-                                     <p className="text-xs text-gray-400 font-mono">Created: {camp.date}</p>
-                                 </div>
-                                 <span className="px-2 py-1 bg-blue-50 text-blue-600 text-xs font-bold rounded-lg">{camp.status}</span>
-                             </div>
-                             <div className="space-y-2">
-                                 <div className="flex justify-between text-sm">
-                                     <span className="text-gray-500">Products</span>
-                                     <span className="font-bold text-gray-800">{camp.productCount}</span>
-                                 </div>
-                                 <div className="flex justify-between text-sm">
-                                     <span className="text-gray-500">Baseline Revenue</span>
-                                     <span className="font-bold text-teal-600">{formatCurrency(camp.baselineGmv, currency)}</span>
+                                     <h3 className="font-bold text-slate-800 text-lg">{camp.name}</h3>
+                                     <p className="text-xs text-slate-400 font-mono">Created: {camp.date}</p>
+                                     {camp.adUrl && (
+                                         <a href={camp.adUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-500 flex items-center gap-1 mt-1 hover:underline">
+                                             <ExternalLink className="w-3 h-3" /> View Ad Platform
+                                         </a>
+                                     )}
                                  </div>
                              </div>
-                             <div className="mt-4 pt-4 border-t border-gray-100 flex gap-2">
-                                <button className="flex-1 py-2 text-xs font-bold text-gray-600 bg-gray-50 rounded-lg hover:bg-gray-100">Edit</button>
-                                <button className="flex-1 py-2 text-xs font-bold text-teal-600 bg-teal-50 rounded-lg hover:bg-teal-100">Track</button>
+                             <div className="space-y-2 mb-4">
+                                 <div className="flex justify-between text-sm">
+                                     <span className="text-slate-500">Products / Discount</span>
+                                     <span className="font-bold text-slate-800">{camp.productCount} items / -{camp.discountPercent}%</span>
+                                 </div>
+                                 <div className="flex justify-between text-sm">
+                                     <span className="text-slate-500">Baseline Revenue</span>
+                                     <span className="font-bold text-slate-600">{formatCurrency(camp.baselineGmv, currency)}</span>
+                                 </div>
+                                 <div className="flex justify-between text-sm bg-violet-50 p-2 rounded-lg border border-violet-100">
+                                     <span className="text-violet-600 font-bold">Proj. Revenue</span>
+                                     <span className="font-bold text-violet-700">{formatCurrency(camp.projectedRevenue, currency)}</span>
+                                 </div>
+                             </div>
+                             <div className="pt-2 border-t border-slate-100 flex gap-2">
+                                <button className="flex-1 py-2 text-xs font-bold text-violet-600 bg-violet-50 rounded-lg hover:bg-violet-100">Analytics</button>
                              </div>
                          </div>
                      ))
@@ -495,43 +536,79 @@ const CampaignView = ({ products, currency }) => {
              {/* Modal Overlay */}
              {showModal && (
                  <div className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
-                     <div className="bg-white rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col max-h-[80vh]">
-                         <div className="p-4 border-b border-gray-100 flex justify-between items-center">
-                             <h3 className="font-bold text-gray-800">New Campaign</h3>
-                             <button onClick={() => setShowModal(false)}><X className="w-5 h-5 text-gray-500" /></button>
+                     <div className="bg-white rounded-xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col max-h-[85vh]">
+                         <div className="p-4 border-b border-slate-100 flex justify-between items-center">
+                             <h3 className="font-bold text-slate-800">New Campaign Plan</h3>
+                             <button onClick={() => setShowModal(false)}><X className="w-5 h-5 text-slate-500" /></button>
                          </div>
-                         <div className="p-4 space-y-4 overflow-y-auto flex-1">
+                         <div className="p-6 space-y-5 overflow-y-auto flex-1">
                              <div>
-                                 <label className="block text-sm font-medium text-gray-700 mb-1">Campaign Name</label>
+                                 <label className="block text-sm font-medium text-slate-700 mb-1">Campaign Name</label>
                                  <input 
                                      type="text" 
                                      value={newCampName} 
                                      onChange={(e) => setNewCampName(e.target.value)}
                                      placeholder="e.g. 11.11 Mega Sale"
-                                     className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none"
+                                     className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-violet-500 outline-none"
                                  />
                              </div>
+                             <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1">Target Discount %</label>
+                                    <input 
+                                        type="number" 
+                                        min="0" max="100"
+                                        value={discountPercent} 
+                                        onChange={(e) => setDiscountPercent(Number(e.target.value))}
+                                        className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-violet-500 outline-none"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1">Ad Link (Optional)</label>
+                                    <div className="relative">
+                                        <LinkIcon className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
+                                        <input 
+                                            type="url" 
+                                            value={adUrl} 
+                                            onChange={(e) => setAdUrl(e.target.value)}
+                                            placeholder="https://ads..."
+                                            className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-violet-500 outline-none"
+                                        />
+                                    </div>
+                                </div>
+                             </div>
+                             
                              <div>
-                                 <label className="block text-sm font-medium text-gray-700 mb-2">Select Products</label>
-                                 <div className="max-h-48 overflow-y-auto border border-gray-100 rounded-lg divide-y divide-gray-100">
+                                 <label className="block text-sm font-medium text-slate-700 mb-2">Select Campaign Products</label>
+                                 <div className="max-h-48 overflow-y-auto border border-slate-100 rounded-lg divide-y divide-slate-100">
                                      {products.map(p => (
                                          <div 
                                             key={p.id} 
                                             onClick={() => toggleSelection(p.id)}
-                                            className={`p-2 flex items-center justify-between cursor-pointer hover:bg-gray-50 ${selectedIds.includes(p.id) ? 'bg-teal-50' : ''}`}
+                                            className={`p-2 flex items-center justify-between cursor-pointer hover:bg-slate-50 ${selectedIds.includes(p.id) ? 'bg-violet-50' : ''}`}
                                          >
-                                             <span className="text-sm truncate w-2/3">{p.name}</span>
-                                             {selectedIds.includes(p.id) && <CheckCircle2 className="w-4 h-4 text-teal-600" />}
+                                             <div className="flex flex-col overflow-hidden mr-2">
+                                                 <span className="text-sm truncate font-medium text-slate-700">{p.name}</span>
+                                                 <span className="text-[10px] text-slate-400">Baseline: {formatCurrency(p.gmv, currency)}</span>
+                                             </div>
+                                             {selectedIds.includes(p.id) && <CheckCircle2 className="w-4 h-4 text-violet-600 flex-shrink-0" />}
                                          </div>
                                      ))}
                                  </div>
-                                 <p className="text-xs text-right text-gray-400 mt-1">{selectedIds.length} selected</p>
+                                 <p className="text-xs text-right text-slate-400 mt-1">{selectedIds.length} items selected</p>
+                             </div>
+
+                             {/* Smart Preview */}
+                             <div className="bg-slate-50 p-3 rounded-lg text-xs text-slate-600 flex justify-between items-center">
+                                <span>Projected Revenue (with lift):</span>
+                                <span className="font-bold text-violet-700">{formatCurrency(products.filter(p => selectedIds.includes(p.id)).reduce((s,p)=>s+p.gmv,0) * (1 - (discountPercent/100)) * (1 + ((discountPercent / 5) * 0.1)), currency)}</span>
                              </div>
                          </div>
-                         <div className="p-4 border-t border-gray-100 bg-gray-50 flex justify-end">
+                         <div className="p-4 border-t border-slate-100 bg-slate-50 flex justify-end">
                              <button 
                                 onClick={handleCreate}
-                                className="px-6 py-2 bg-teal-600 text-white rounded-lg font-bold text-sm hover:bg-teal-700"
+                                disabled={!newCampName || selectedIds.length === 0}
+                                className={`px-6 py-2 rounded-lg font-bold text-sm transition-all ${!newCampName || selectedIds.length === 0 ? 'bg-slate-300 text-slate-500 cursor-not-allowed' : 'bg-violet-600 text-white hover:bg-violet-700 shadow-md'}`}
                              >
                                  Create Plan
                              </button>
@@ -543,15 +620,135 @@ const CampaignView = ({ products, currency }) => {
     );
 };
 
+const CalendarView = ({ uploadedFiles, campaigns }) => {
+    // Smart Calendar with Month Navigation
+    const [currentMonth, setCurrentMonth] = useState(new Date());
+    const [selectedDate, setSelectedDate] = useState(null); // State for selected date modal
+    
+    const daysInMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate();
+    const firstDay = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay();
+    const days = Array.from({length: daysInMonth}, (_, i) => i + 1);
+    
+    const getEventsForDay = (day) => {
+        const dateObj = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
+        // const dateStr = dateObj.toLocaleDateString();
+        const events = [];
+        
+        // Campaign Events
+        campaigns.forEach(c => {
+             // Normalized date comparison
+             if(new Date(c.date).toDateString() === dateObj.toDateString()) {
+                 events.push({ type: 'campaign', title: c.name });
+             }
+        });
+        
+        // Import History Events
+        uploadedFiles.forEach(f => {
+            if(typeof f === 'object' && f.date) {
+                 if(new Date(f.date).toDateString() === dateObj.toDateString()) {
+                     events.push({ type: 'import', title: `Import: ${f.name}` });
+                 }
+            }
+        });
+        
+        return events;
+    };
+
+    const nextMonth = () => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
+    const prevMonth = () => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
+    const goToToday = () => setCurrentMonth(new Date());
+
+    return (
+        <div className="h-full bg-white rounded-xl p-6 shadow-sm border border-slate-200 animate-in fade-in slide-in-from-bottom-4 flex flex-col relative">
+             <div className="flex justify-between items-center mb-6">
+                <div className="flex items-center gap-4">
+                    <h2 className="text-2xl font-bold text-slate-800 tracking-tight">Operational Calendar</h2>
+                    <div className="flex gap-1">
+                        <button onClick={prevMonth} className="p-1 hover:bg-slate-100 rounded-full"><ChevronLeft className="w-5 h-5 text-slate-600"/></button>
+                        <button onClick={nextMonth} className="p-1 hover:bg-slate-100 rounded-full"><ChevronRight className="w-5 h-5 text-slate-600"/></button>
+                    </div>
+                </div>
+                <div className="flex items-center gap-4">
+                    <span className="text-sm font-medium text-slate-500 uppercase tracking-wide">
+                        {currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                    </span>
+                    <button onClick={goToToday} className="text-xs font-bold text-violet-600 bg-violet-50 px-3 py-1 rounded-full">Today</button>
+                </div>
+             </div>
+             
+             <div className="grid grid-cols-7 gap-2 mb-2">
+                 {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
+                     <div key={d} className="text-center text-xs font-bold text-slate-400 uppercase">{d}</div>
+                 ))}
+             </div>
+             
+             <div className="grid grid-cols-7 gap-2 flex-1 overflow-y-auto">
+                 {Array.from({length: firstDay}).map((_, i) => <div key={`empty-${i}`} className="h-24 bg-transparent"></div>)}
+                 
+                 {days.map(day => {
+                     const events = getEventsForDay(day);
+                     const todayDate = new Date();
+                     const isToday = day === todayDate.getDate() && currentMonth.getMonth() === todayDate.getMonth() && currentMonth.getFullYear() === todayDate.getFullYear();
+                     
+                     return (
+                         <div 
+                            key={day} 
+                            onClick={() => events.length > 0 && setSelectedDate({ day, events })}
+                            className={`min-h-[100px] p-2 rounded-xl border ${isToday ? 'bg-violet-50 border-violet-200' : 'bg-white border-slate-100'} flex flex-col gap-1 overflow-hidden hover:shadow-md transition-shadow relative cursor-pointer group`}
+                         >
+                             <span className={`text-sm font-bold ${isToday ? 'text-violet-700' : 'text-slate-700'}`}>{day}</span>
+                             {events.map((ev, i) => (
+                                 <div key={i} className={`text-[10px] px-1.5 py-0.5 rounded truncate font-medium ${ev.type === 'campaign' ? 'bg-indigo-100 text-indigo-700' : 'bg-green-100 text-green-700'}`}>
+                                     {ev.title}
+                                 </div>
+                             ))}
+                             {/* Traffic Sim for demo */}
+                             {(day % 7 === 0 || day === 15) && (
+                                 <div className="mt-auto flex justify-center">
+                                     <div className="text-[9px] bg-rose-50 text-rose-600 px-1 rounded flex items-center gap-1 w-full justify-center">
+                                         <TrendingUp className="w-2 h-2" /> Traffic Spike
+                                     </div>
+                                 </div>
+                             )}
+                         </div>
+                     );
+                 })}
+             </div>
+
+             {/* Day Detail Modal */}
+             {selectedDate && (
+                 <div className="absolute inset-0 bg-white/95 backdrop-blur-md z-10 rounded-xl flex items-center justify-center p-8 animate-in fade-in zoom-in duration-200">
+                     <div className="w-full max-w-md">
+                         <div className="flex justify-between items-center mb-6">
+                             <h3 className="text-2xl font-bold text-slate-800">
+                                 {currentMonth.toLocaleDateString('en-US', { month: 'long' })} {selectedDate.day}
+                             </h3>
+                             <button onClick={() => setSelectedDate(null)} className="p-2 hover:bg-slate-100 rounded-full"><X className="w-6 h-6 text-slate-500"/></button>
+                         </div>
+                         <div className="space-y-3">
+                             {selectedDate.events.map((ev, i) => (
+                                 <div key={i} className={`p-4 rounded-xl border flex items-center gap-3 ${ev.type === 'campaign' ? 'bg-indigo-50 border-indigo-100 text-indigo-800' : 'bg-green-50 border-green-100 text-green-800'}`}>
+                                     {ev.type === 'campaign' ? <Target className="w-5 h-5"/> : <Database className="w-5 h-5"/>}
+                                     <span className="font-medium">{ev.title}</span>
+                                 </div>
+                             ))}
+                         </div>
+                     </div>
+                 </div>
+             )}
+        </div>
+    );
+};
+
 const Sidebar = ({ activeView, setActiveView, smartInsights, fileInputRef, handleFileUpload }) => (
-  <div className="w-full md:w-64 bg-white/50 p-6 space-y-2 border-b md:border-b-0 md:border-r border-white/20 flex-shrink-0 flex flex-col">
+  <div className="w-full md:w-64 bg-slate-50/50 p-6 space-y-2 border-b md:border-b-0 md:border-r border-slate-200 flex-shrink-0 flex flex-col">
     <div className="mb-8 flex items-center justify-between md:block">
       <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-teal-600 rounded-lg flex items-center justify-center text-white font-bold shadow-lg shadow-teal-600/20">S</div>
-          <h1 className="text-2xl font-bold text-gray-800 tracking-tight">ShopPro</h1>
+          <div className="w-8 h-8 bg-violet-700 rounded-lg flex items-center justify-center text-white font-bold shadow-lg shadow-violet-700/20">Q</div>
+          <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Quantro</h1>
       </div>
       <button className="md:hidden p-2">
-          <LayoutDashboard className="w-6 h-6 text-gray-600"/>
+          <LayoutDashboard className="w-6 h-6 text-slate-600"/>
       </button>
     </div>
     
@@ -575,10 +772,16 @@ const Sidebar = ({ activeView, setActiveView, smartInsights, fileInputRef, handl
         onClick={() => setActiveView('media')} 
       />
       <NavButton 
-        icon={Calendar} 
+        icon={Target} 
         label="Campaigns" 
         active={activeView === 'campaigns'} 
         onClick={() => setActiveView('campaigns')} 
+      />
+      <NavButton 
+        icon={CalendarIcon} 
+        label="Calendar" 
+        active={activeView === 'calendar'} 
+        onClick={() => setActiveView('calendar')} 
       />
       <NavButton 
         icon={Wallet} 
@@ -592,31 +795,25 @@ const Sidebar = ({ activeView, setActiveView, smartInsights, fileInputRef, handl
         active={activeView === 'reports'} 
         onClick={() => setActiveView('reports')} 
       />
-      <NavButton 
-        icon={Settings} 
-        label="Configuration" 
-        active={activeView === 'settings'} 
-        onClick={() => setActiveView('settings')} 
-      />
       
       <div className="pt-4 pb-2 flex items-center gap-2">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-4">AI Insights</p>
-          <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-4">AI Insights</p>
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
       </div>
       {smartInsights.map((insight, idx) => {
           const Icon = insight.icon;
           return (
-          <div key={idx} className={`mx-2 p-3 rounded-xl bg-${insight.color}-50 border border-${insight.color}-100 text-xs shadow-sm transition-all hover:scale-[1.02]`}>
-              <div className={`flex items-center gap-2 font-bold text-${insight.color}-700 mb-1`}>
+          <div key={idx} className={`mx-2 p-3 rounded-xl bg-white border border-slate-200 text-xs shadow-sm transition-all hover:scale-[1.02] hover:border-violet-200 group`}>
+              <div className={`flex items-center gap-2 font-bold text-${insight.color}-700 mb-1 group-hover:text-violet-700`}>
                   <Icon className="w-3 h-3" /> {insight.title}
               </div>
-              <p className={`text-${insight.color}-800 opacity-90 leading-relaxed`}>{insight.text}</p>
+              <p className={`text-slate-600 leading-relaxed`}>{insight.text}</p>
           </div>
           );
       })}
     </div>
 
-    <div className="mt-4 pt-4 border-t border-gray-200/50">
+    <div className="mt-4 pt-4 border-t border-slate-200">
       <input 
           type="file" 
           accept=".csv,.xlsx,.xls" 
@@ -626,27 +823,27 @@ const Sidebar = ({ activeView, setActiveView, smartInsights, fileInputRef, handl
       />
       <button 
           onClick={() => fileInputRef.current?.click()}
-          className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white border border-teal-100 text-teal-700 rounded-xl font-medium hover:bg-teal-50 hover:border-teal-200 transition-all text-sm shadow-sm group"
+          className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white border border-slate-200 text-slate-700 rounded-lg font-medium hover:bg-slate-50 hover:border-violet-300 transition-all text-sm shadow-sm group"
       >
-          <Upload className="w-4 h-4 group-hover:-translate-y-0.5 transition-transform" />
+          <Upload className="w-4 h-4 group-hover:-translate-y-0.5 transition-transform text-violet-600" />
           <div className="flex flex-col items-start">
              <span>Import Data</span>
-             <span className="text-[10px] text-gray-400 font-normal">Supports XLSX, CSV</span>
+             <span className="text-[10px] text-slate-400 font-normal">Supports XLSX, CSV</span>
           </div>
       </button>
     </div>
   </div>
 );
 
-const DashboardView = ({ topProduct, setSelectedProduct, currency, channelData, totalChannelGmv, summary, timePeriod, setTimePeriod, platformFilter, setPlatformFilter, availablePlatforms }) => (
+const DashboardView = ({ topProduct, setSelectedProduct, currency, channelData, totalChannelGmv, summary, timePeriod, setTimePeriod, platformFilter, setPlatformFilter, availablePlatforms, visibleKPIs }) => (
   <>
     <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4 animate-in fade-in slide-in-from-top-2">
-       <div className="flex bg-white/80 backdrop-blur-md p-1 rounded-xl border border-white/60 shadow-sm">
+       <div className="flex bg-white p-1 rounded-lg border border-slate-200 shadow-sm">
           {['All Time', 'Last Import'].map(period => (
               <button
                   key={period}
                   onClick={() => setTimePeriod(period)}
-                  className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${timePeriod === period ? 'bg-white text-teal-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                  className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${timePeriod === period ? 'bg-slate-100 text-violet-700 font-bold shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
               >
                   {period}
               </button>
@@ -654,11 +851,11 @@ const DashboardView = ({ topProduct, setSelectedProduct, currency, channelData, 
        </div>
 
        <div className="flex items-center gap-2">
-          <Filter className="w-4 h-4 text-gray-500" />
+          <Filter className="w-4 h-4 text-slate-500" />
           <select 
               value={platformFilter}
               onChange={(e) => setPlatformFilter(e.target.value)}
-              className="bg-white/80 backdrop-blur-md border-none text-sm font-semibold text-gray-700 focus:ring-0 cursor-pointer hover:bg-white/90 rounded-lg px-2 py-1 transition-colors"
+              className="bg-white border-none text-sm font-semibold text-slate-700 focus:ring-0 cursor-pointer hover:bg-slate-50 rounded-lg px-2 py-1 transition-colors"
           >
               {availablePlatforms.map(p => <option key={p} value={p}>{p} Platform</option>)}
           </select>
@@ -669,32 +866,32 @@ const DashboardView = ({ topProduct, setSelectedProduct, currency, channelData, 
       {/* Top Product */}
       <div 
           onClick={() => topProduct.gmv && setSelectedProduct(topProduct)}
-          className="bg-white/60 backdrop-blur-md rounded-3xl p-6 shadow-sm border border-white/50 hover:shadow-md transition-all cursor-pointer group"
+          className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md hover:border-violet-200 transition-all cursor-pointer group"
       >
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
-              <div className="p-1.5 bg-rose-100 rounded-lg">
+              <div className="p-1.5 bg-rose-50 rounded-lg">
                 <TrendingUp className="w-5 h-5 text-rose-500" />
               </div>
-              <h3 className="font-bold text-gray-800 text-lg">Top Performer</h3>
+              <h3 className="font-bold text-slate-800 text-lg">Top Performer</h3>
           </div>
-          <ArrowUpRight className="w-4 h-4 text-gray-400 group-hover:text-teal-600 transition-colors" />
+          <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-violet-600 transition-colors" />
         </div>
         
         {topProduct && topProduct.gmv > 0 ? (
             <>
               <div className="flex items-start gap-4 mb-6">
-                  <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center flex-shrink-0 border border-gray-200 overflow-hidden relative">
-                       <div className="absolute top-0 right-0 bg-yellow-400 text-[8px] font-bold px-1 rounded-bl">#{topProduct.abcCategory}</div>
-                      <Package className="w-8 h-8 text-gray-400" />
+                  <div className="w-16 h-16 bg-slate-50 rounded-xl flex items-center justify-center flex-shrink-0 border border-slate-100 overflow-hidden relative">
+                       <div className="absolute top-0 right-0 bg-amber-400 text-[8px] font-bold px-1 rounded-bl">#{topProduct.abcCategory}</div>
+                      <Package className="w-8 h-8 text-slate-300" />
                   </div>
                   <div>
-                      <h4 className="font-bold text-gray-800 line-clamp-2 leading-tight">{topProduct.name}</h4>
+                      <h4 className="font-bold text-slate-800 line-clamp-2 leading-tight">{topProduct.name}</h4>
                       <div className="flex flex-wrap gap-2 mt-2">
-                          <span className="text-[10px] uppercase font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded border border-teal-100">
+                          <span className="text-[10px] uppercase font-bold text-violet-700 bg-violet-50 px-2 py-0.5 rounded border border-violet-100">
                               {formatCurrency(topProduct.gmv, currency)}
                           </span>
-                          <span className="text-[10px] text-gray-500 font-mono bg-gray-100 px-1.5 py-0.5 rounded">
+                          <span className="text-[10px] text-slate-500 font-mono bg-slate-100 px-1.5 py-0.5 rounded">
                               {topProduct.platform}
                           </span>
                       </div>
@@ -702,24 +899,24 @@ const DashboardView = ({ topProduct, setSelectedProduct, currency, channelData, 
               </div>
               
               <div className="grid grid-cols-3 gap-3">
-                  <div className="bg-white/50 p-3 rounded-2xl border border-white/50">
-                      <p className="text-[10px] text-gray-500 mb-1 uppercase font-bold">Views</p>
-                      <p className="font-bold text-gray-800">
+                  <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                      <p className="text-[10px] text-slate-400 mb-1 uppercase font-bold">Views</p>
+                      <p className="font-bold text-slate-800">
                           {(topProduct.shopViews + (topProduct.videoViews || 0) + (topProduct.liveViews || 0)).toLocaleString()}
                       </p>
                   </div>
-                  <div className="bg-white/50 p-3 rounded-2xl border border-white/50">
-                      <p className="text-[10px] text-gray-500 mb-1 uppercase font-bold">Sold</p>
-                      <p className="font-bold text-gray-800">{topProduct.itemsSold}</p>
+                  <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                      <p className="text-[10px] text-slate-400 mb-1 uppercase font-bold">Sold</p>
+                      <p className="font-bold text-slate-800">{topProduct.itemsSold}</p>
                   </div>
-                  <div className="bg-white/50 p-3 rounded-2xl border border-white/50">
-                      <p className="text-[10px] text-gray-500 mb-1 uppercase font-bold">CTR</p>
-                      <p className="font-bold text-gray-800">{topProduct.ctr}</p>
+                  <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                      <p className="text-[10px] text-slate-400 mb-1 uppercase font-bold">CTR</p>
+                      <p className="font-bold text-slate-800">{topProduct.ctr}</p>
                   </div>
               </div>
             </>
         ) : (
-            <div className="h-40 flex flex-col items-center justify-center text-gray-400">
+            <div className="h-40 flex flex-col items-center justify-center text-slate-400">
               <Package className="w-12 h-12 mb-2 opacity-20" />
               <p>No sales data available</p>
             </div>
@@ -727,50 +924,50 @@ const DashboardView = ({ topProduct, setSelectedProduct, currency, channelData, 
       </div>
 
       {/* Channel Statistics */}
-      <div className="bg-white/60 backdrop-blur-md rounded-3xl p-6 shadow-sm border border-white/50 hover:shadow-md transition-all flex flex-col justify-between">
+      <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md hover:border-violet-200 transition-all flex flex-col justify-between">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-bold text-gray-800 text-lg">GMV Source</h3>
+          <h3 className="font-bold text-slate-800 text-lg">GMV Source</h3>
           <div className="flex gap-1 text-xs">
-               <span className="px-2 py-1 bg-teal-100 text-teal-700 rounded-md font-bold">Shop</span>
+               <span className="px-2 py-1 bg-violet-100 text-violet-700 rounded-md font-bold">Shop</span>
                <span className="px-2 py-1 bg-indigo-100 text-indigo-700 rounded-md font-bold">Video</span>
                <span className="px-2 py-1 bg-rose-100 text-rose-700 rounded-md font-bold">Live</span>
           </div>
         </div>
         
         <div className="space-y-6">
-          <div className="flex items-center gap-1 h-8 rounded-xl overflow-hidden bg-gray-100 p-1 border border-white/60">
+          <div className="flex items-center gap-1 h-8 rounded-lg overflow-hidden bg-slate-100 p-1 border border-slate-200">
                    <div 
                       style={{ width: `${(channelData.shop / (totalChannelGmv || 1)) * 100}%` }} 
-                      className="h-full rounded-lg bg-teal-500 shadow-sm relative group cursor-help transition-all duration-500"
+                      className="h-full rounded bg-violet-500 shadow-sm relative group cursor-help transition-all duration-500"
                       title={`Shop: ${formatCurrency(channelData.shop, currency)}`}
                    ></div>
                    <div 
                       style={{ width: `${(channelData.video / (totalChannelGmv || 1)) * 100}%` }} 
-                      className="h-full rounded-lg bg-indigo-500 shadow-sm relative group cursor-help transition-all duration-500"
+                      className="h-full rounded bg-indigo-500 shadow-sm relative group cursor-help transition-all duration-500"
                       title={`Video: ${formatCurrency(channelData.video, currency)}`}
                    ></div>
                    <div 
                       style={{ width: `${(channelData.live / (totalChannelGmv || 1)) * 100}%` }} 
-                      className="h-full rounded-lg bg-rose-500 shadow-sm relative group cursor-help transition-all duration-500"
+                      className="h-full rounded bg-rose-500 shadow-sm relative group cursor-help transition-all duration-500"
                       title={`Live: ${formatCurrency(channelData.live, currency)}`}
                    ></div>
           </div>
 
-          <div className="grid grid-cols-3 gap-2 divide-x divide-gray-200/60">
+          <div className="grid grid-cols-3 gap-2 divide-x divide-slate-100">
             <div className="px-2 text-center">
-              <p className="text-[10px] font-bold text-gray-400 mb-1 uppercase tracking-wider">Shop Tab</p>
-              <p className="text-lg font-bold text-teal-600">{formatCurrency(channelData.shop, currency)}</p>
-              <p className="text-[10px] text-gray-400">{(channelData.shop / (totalChannelGmv || 1) * 100).toFixed(1)}%</p>
+              <p className="text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider">Shop Tab</p>
+              <p className="text-lg font-bold text-violet-600">{formatCurrency(channelData.shop, currency)}</p>
+              <p className="text-[10px] text-slate-400">{(channelData.shop / (totalChannelGmv || 1) * 100).toFixed(1)}%</p>
             </div>
             <div className="px-2 text-center">
-              <p className="text-[10px] font-bold text-gray-400 mb-1 uppercase tracking-wider">Video</p>
+              <p className="text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider">Video</p>
               <p className="text-lg font-bold text-indigo-600">{formatCurrency(channelData.video, currency)}</p>
-              <p className="text-[10px] text-gray-400">{(channelData.video / (totalChannelGmv || 1) * 100).toFixed(1)}%</p>
+              <p className="text-[10px] text-slate-400">{(channelData.video / (totalChannelGmv || 1) * 100).toFixed(1)}%</p>
             </div>
             <div className="px-2 text-center">
-              <p className="text-[10px] font-bold text-gray-400 mb-1 uppercase tracking-wider">Live</p>
+              <p className="text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider">Live</p>
               <p className="text-lg font-bold text-rose-600">{formatCurrency(channelData.live, currency)}</p>
-              <p className="text-[10px] text-gray-400">{(channelData.live / (totalChannelGmv || 1) * 100).toFixed(1)}%</p>
+              <p className="text-[10px] text-slate-400">{(channelData.live / (totalChannelGmv || 1) * 100).toFixed(1)}%</p>
             </div>
           </div>
         </div>
@@ -779,12 +976,12 @@ const DashboardView = ({ topProduct, setSelectedProduct, currency, channelData, 
 
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-8">
       {/* Product List Snippet */}
-      <div className="col-span-1 lg:col-span-2 bg-white/60 backdrop-blur-md rounded-3xl p-6 shadow-sm border border-white/50">
+      <div className="col-span-1 lg:col-span-2 bg-white rounded-xl p-6 shadow-sm border border-slate-200">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="font-bold text-gray-800 text-lg">Inventory Snapshot</h3>
+          <h3 className="font-bold text-slate-800 text-lg">Inventory Snapshot</h3>
           <button 
               onClick={() => setSelectedProduct(topProduct)}
-              className="text-sm font-semibold text-teal-600 hover:text-teal-700 hover:underline flex items-center gap-1"
+              className="text-sm font-semibold text-violet-600 hover:text-violet-700 hover:underline flex items-center gap-1"
           >
               View full list <ArrowUpRight className="w-4 h-4" />
           </button>
@@ -792,7 +989,7 @@ const DashboardView = ({ topProduct, setSelectedProduct, currency, channelData, 
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
               <thead>
-              <tr className="text-gray-400 text-xs font-bold uppercase tracking-wider border-b border-gray-200/60">
+              <tr className="text-slate-400 text-xs font-bold uppercase tracking-wider border-b border-slate-100">
                   <th className="text-left py-3 px-2">Product</th>
                   <th className="text-center py-3 px-2">Class</th>
                   <th className="text-right py-3 px-2">GMV</th>
@@ -800,16 +997,16 @@ const DashboardView = ({ topProduct, setSelectedProduct, currency, channelData, 
                   <th className="text-center py-3 px-2">Status</th>
               </tr>
               </thead>
-              <tbody className="text-gray-700 font-medium">
+              <tbody className="text-slate-700 font-medium">
               {channelData && Object.keys(channelData).length > 0 && topProduct && topProduct.gmv ? (
                   <tr 
                       onClick={() => setSelectedProduct(topProduct)}
-                      className="hover:bg-white/40 transition-colors border-b border-gray-100 last:border-0 group cursor-pointer"
+                      className="hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0 group cursor-pointer"
                   >
                       <td className="py-3 px-2">
                           <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-lg bg-gray-200 flex-shrink-0 group-hover:scale-105 transition-transform flex items-center justify-center text-xs text-gray-400">IMG</div>
-                              <div className="max-w-[200px] truncate font-medium text-gray-800 group-hover:text-teal-700 transition-colors" title={topProduct.name}>{topProduct.name}</div>
+                              <div className="w-8 h-8 rounded-lg bg-slate-100 flex-shrink-0 group-hover:scale-105 transition-transform flex items-center justify-center text-xs text-slate-400">IMG</div>
+                              <div className="max-w-[200px] truncate font-medium text-slate-800 group-hover:text-violet-700 transition-colors" title={topProduct.name}>{topProduct.name}</div>
                           </div>
                       </td>
                        <td className="py-3 px-2 text-center">
@@ -817,10 +1014,10 @@ const DashboardView = ({ topProduct, setSelectedProduct, currency, channelData, 
                               {topProduct.abcCategory}
                           </span>
                       </td>
-                      <td className="py-3 px-2 text-right font-mono text-teal-700 font-bold">{formatCurrency(topProduct.gmv, currency)}</td>
-                      <td className="py-3 px-2 text-center text-gray-600">{topProduct.itemsSold}</td>
+                      <td className="py-3 px-2 text-right font-mono text-violet-700 font-bold">{formatCurrency(topProduct.gmv, currency)}</td>
+                      <td className="py-3 px-2 text-center text-slate-600">{topProduct.itemsSold}</td>
                       <td className="py-3 px-2 text-center">
-                          <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold ${topProduct.status === 'Active' ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-gray-100 text-gray-500 border border-gray-200'}`}>
+                          <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold ${topProduct.status === 'Active' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-500 border border-slate-200'}`}>
                               {topProduct.status}
                           </span>
                       </td>
@@ -835,64 +1032,70 @@ const DashboardView = ({ topProduct, setSelectedProduct, currency, channelData, 
 
       {/* Right Side Cards */}
       <div className="space-y-4">
-        <StatCard 
-          title="Total GMV" 
-          value={formatCurrency(summary.totalGmv, currency)} 
-          icon={DollarSign}
-          colorClass="from-purple-100 to-purple-50 text-purple-600"
-          info="Total Gross Merchandise Value across all channels before deductions."
-        />
-        <StatCard 
-          title="Avg Order Value" 
-          value={formatCurrency(summary.avgOrderValue, currency)} 
-          icon={ShoppingBag}
-          colorClass="from-pink-100 to-pink-50 text-pink-600"
-          info="Average revenue generated per individual order."
-        />
-        <StatCard 
-          title="Conversion Rate" 
-          value={summary.conversionRate} 
-          icon={MousePointer2}
-          colorClass="from-teal-100 to-teal-50 text-teal-600"
-          info="Percentage of visitors who made a purchase."
-        />
+        {visibleKPIs?.totalGMV && (
+          <StatCard 
+            title="Total GMV" 
+            value={formatCurrency(summary.totalGmv, currency)} 
+            icon={DollarSign}
+            colorClass="bg-violet-50 text-violet-600"
+            info="Total Gross Merchandise Value across all channels before deductions."
+          />
+        )}
+        {visibleKPIs?.avgOrderValue && (
+          <StatCard 
+            title="Avg Order Value" 
+            value={formatCurrency(summary.avgOrderValue, currency)} 
+            icon={ShoppingBag}
+            colorClass="bg-pink-50 text-pink-600"
+            info="Average revenue generated per individual order."
+          />
+        )}
+        {visibleKPIs?.conversionRate && (
+          <StatCard 
+            title="Conversion Rate" 
+            value={summary.conversionRate} 
+            icon={MousePointer2}
+            colorClass="bg-emerald-50 text-emerald-600"
+            info="Percentage of visitors who made a purchase."
+          />
+        )}
       </div>
     </div>
   </>
 );
 
 const InventoryView = ({ processedProducts, handleExportCSV, statusFilter, setStatusFilter, searchTerm, setSearchTerm, handleSort, getSortIcon, setSelectedProduct, currency }) => (
-  <div className="bg-white/60 backdrop-blur-md rounded-3xl p-6 shadow-sm border border-white/50 h-full flex flex-col animate-in fade-in slide-in-from-bottom-4">
+  <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 h-full flex flex-col animate-in fade-in slide-in-from-bottom-4">
     <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
       <div>
-          <h3 className="font-bold text-gray-800 text-xl flex items-center gap-2">
-              <Package className="w-5 h-5 text-teal-600" />
+          <h3 className="font-bold text-slate-800 text-xl flex items-center gap-2">
+              <Package className="w-5 h-5 text-violet-600" />
               Product Inventory
           </h3>
-          <p className="text-sm text-gray-500 mt-1">{processedProducts.length} items found</p>
+          <p className="text-sm text-slate-500 mt-1">{processedProducts.length} items found</p>
       </div>
       
       <div className="flex flex-wrap gap-2">
           <button 
             onClick={handleExportCSV}
-            className="flex items-center gap-2 px-4 py-2 bg-white rounded-xl border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-teal-600"
+            className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-violet-600"
           >
             <Download className="w-4 h-4" /> Export CSV
           </button>
 
           {/* Status Filter Dropdown */}
           <div className="relative group">
-              <button className="flex items-center gap-2 px-4 py-2 bg-white rounded-xl border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50">
+              <button className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50">
                   <Filter className="w-4 h-4" />
                   {statusFilter}
                   <ChevronDown className="w-3 h-3 ml-1 opacity-50" />
               </button>
-              <div className="absolute top-full mt-2 right-0 w-32 bg-white rounded-xl shadow-xl border border-gray-100 hidden group-hover:block z-20 py-1">
+              <div className="absolute top-full mt-2 right-0 w-32 bg-white rounded-lg shadow-xl border border-slate-100 hidden group-hover:block z-20 py-1">
                   {['All', 'Active', 'Inactive'].map(s => (
                       <button 
                           key={s}
                           onClick={() => setStatusFilter(s)}
-                          className={`w-full text-left px-4 py-2 text-sm hover:bg-teal-50 hover:text-teal-700 ${statusFilter === s ? 'text-teal-700 font-bold bg-teal-50/50' : 'text-gray-600'}`}
+                          className={`w-full text-left px-4 py-2 text-sm hover:bg-violet-50 hover:text-violet-700 ${statusFilter === s ? 'text-violet-700 font-bold bg-violet-50/50' : 'text-slate-600'}`}
                       >
                           {s}
                       </button>
@@ -901,13 +1104,13 @@ const InventoryView = ({ processedProducts, handleExportCSV, statusFilter, setSt
           </div>
 
           <div className="relative">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input 
                   type="text" 
                   placeholder="Search ID or Name..." 
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-9 pr-4 py-2 bg-white rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/50 w-64"
+                  className="pl-9 pr-4 py-2 bg-white rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/50 w-64"
               />
           </div>
       </div>
@@ -915,45 +1118,45 @@ const InventoryView = ({ processedProducts, handleExportCSV, statusFilter, setSt
 
     <div className="overflow-auto flex-1 -mx-6 px-6">
       <table className="w-full text-sm">
-          <thead className="sticky top-0 bg-gray-50/95 backdrop-blur-sm z-10">
-          <tr className="text-gray-500 text-xs font-bold uppercase tracking-wider border-b border-gray-200">
-              <th className="text-left py-4 px-2 cursor-pointer hover:text-teal-600" onClick={() => handleSort('name')}>
+          <thead className="sticky top-0 bg-white z-10 border-b border-slate-200">
+          <tr className="text-slate-400 text-xs font-bold uppercase tracking-wider">
+              <th className="text-left py-4 px-2 cursor-pointer hover:text-violet-600" onClick={() => handleSort('name')}>
                   <div className="flex items-center gap-1">Product {getSortIcon('name')}</div>
               </th>
-              <th className="text-center py-4 px-2 cursor-pointer hover:text-teal-600" onClick={() => handleSort('abcCategory')}>
+              <th className="text-center py-4 px-2 cursor-pointer hover:text-violet-600" onClick={() => handleSort('abcCategory')}>
                   <div className="flex items-center justify-center gap-1">Class {getSortIcon('abcCategory')}</div>
               </th>
               <th className="text-center py-4 px-2">Status</th>
-              <th className="text-right py-4 px-2 cursor-pointer hover:text-teal-600" onClick={() => handleSort('gmv')}>
+              <th className="text-right py-4 px-2 cursor-pointer hover:text-violet-600" onClick={() => handleSort('gmv')}>
                   <div className="flex items-center justify-end gap-1">GMV {getSortIcon('gmv')}</div>
               </th>
-              <th className="text-center py-4 px-2 cursor-pointer hover:text-teal-600" onClick={() => handleSort('orders')}>
+              <th className="text-center py-4 px-2 cursor-pointer hover:text-violet-600" onClick={() => handleSort('orders')}>
                   <div className="flex items-center justify-center gap-1">Orders {getSortIcon('orders')}</div>
               </th>
-              <th className="text-right py-4 px-2 cursor-pointer hover:text-teal-600" onClick={() => handleSort('shopGmv')}>
+              <th className="text-right py-4 px-2 cursor-pointer hover:text-violet-600" onClick={() => handleSort('shopGmv')}>
                   <div className="flex items-center justify-end gap-1">Shop {getSortIcon('shopGmv')}</div>
               </th>
-              <th className="text-right py-4 px-2 cursor-pointer hover:text-teal-600" onClick={() => handleSort('videoGmv')}>
+              <th className="text-right py-4 px-2 cursor-pointer hover:text-violet-600" onClick={() => handleSort('videoGmv')}>
                   <div className="flex items-center justify-end gap-1">Video {getSortIcon('videoGmv')}</div>
               </th>
-              <th className="text-center py-4 px-2 cursor-pointer hover:text-teal-600" onClick={() => handleSort('ctr')}>
+              <th className="text-center py-4 px-2 cursor-pointer hover:text-violet-600" onClick={() => handleSort('ctr')}>
                   <div className="flex items-center justify-center gap-1">CTR {getSortIcon('ctr')}</div>
               </th>
           </tr>
           </thead>
-          <tbody className="text-gray-700 font-medium divide-y divide-gray-100">
+          <tbody className="text-slate-700 font-medium divide-y divide-slate-100">
           {processedProducts.map((item, idx) => (
               <tr 
                   key={idx} 
                   onClick={() => setSelectedProduct(item)}
-                  className="hover:bg-teal-50/30 transition-colors group cursor-pointer"
+                  className="hover:bg-slate-50 transition-colors group cursor-pointer"
               >
                   <td className="py-3 px-2">
                       <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-gray-100 flex-shrink-0 border border-gray-200 group-hover:border-teal-200 transition-colors"></div>
+                          <div className="w-10 h-10 rounded-lg bg-slate-100 flex-shrink-0 border border-slate-200 group-hover:border-violet-200 transition-colors"></div>
                           <div>
-                              <div className="max-w-[220px] lg:max-w-[300px] truncate font-semibold text-gray-800 group-hover:text-teal-700 transition-colors" title={item.name}>{item.name}</div>
-                              <div className="text-[10px] text-gray-400 font-mono">{item.id}</div>
+                              <div className="max-w-[220px] lg:max-w-[300px] truncate font-semibold text-slate-800 group-hover:text-violet-700 transition-colors" title={item.name}>{item.name}</div>
+                              <div className="text-[10px] text-slate-400 font-mono">{item.id}</div>
                           </div>
                       </div>
                   </td>
@@ -963,15 +1166,15 @@ const InventoryView = ({ processedProducts, handleExportCSV, statusFilter, setSt
                       </span>
                   </td>
                   <td className="py-3 px-2 text-center">
-                      <span className={`px-2.5 py-1 rounded-full text-[10px] uppercase font-bold tracking-wide ${item.status === 'Active' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-gray-100 text-gray-500 border border-gray-200'}`}>
+                      <span className={`px-2.5 py-1 rounded-full text-[10px] uppercase font-bold tracking-wide ${item.status === 'Active' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-500 border border-slate-200'}`}>
                           {item.status}
                       </span>
                   </td>
-                  <td className="py-3 px-2 text-right font-mono text-teal-700 font-bold">{formatCurrency(item.gmv, currency)}</td>
+                  <td className="py-3 px-2 text-right font-mono text-violet-700 font-bold">{formatCurrency(item.gmv, currency)}</td>
                   <td className="py-3 px-2 text-center">{item.orders}</td>
-                  <td className="py-3 px-2 text-right font-mono text-gray-600">{formatCurrency(item.shopGmv, currency)}</td>
-                  <td className="py-3 px-2 text-right font-mono text-gray-600">{formatCurrency(item.videoGmv, currency)}</td>
-                  <td className="py-3 px-2 text-center text-gray-500">{item.ctr}</td>
+                  <td className="py-3 px-2 text-right font-mono text-slate-600">{formatCurrency(item.shopGmv, currency)}</td>
+                  <td className="py-3 px-2 text-right font-mono text-slate-600">{formatCurrency(item.videoGmv, currency)}</td>
+                  <td className="py-3 px-2 text-center text-slate-500">{item.ctr}</td>
               </tr>
           ))}
           </tbody>
@@ -982,76 +1185,138 @@ const InventoryView = ({ processedProducts, handleExportCSV, statusFilter, setSt
 
 const ReportView = ({ settings, summary, smartInsights, channelData, currency, processedProducts, setActiveView }) => {
   const dateStr = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  const [showSummary, setShowSummary] = useState(true);
+  const [showAI, setShowAI] = useState(true);
+  const [showChannels, setShowChannels] = useState(true);
+  const [note, setNote] = useState('');
+  const [pdfReady, setPdfReady] = useState(false);
+  const reportRef = useRef(null);
+
+  // Load html2pdf script dynamically
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
+    script.integrity = "sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==";
+    script.crossOrigin = "anonymous";
+    script.referrerPolicy = "no-referrer";
+    script.onload = () => setPdfReady(true);
+    document.body.appendChild(script);
+    return () => {
+        if(document.body.contains(script)) document.body.removeChild(script);
+    }
+  }, []);
+
+  const handleDownloadPDF = () => {
+      if(!pdfReady || !reportRef.current) return;
+      
+      const element = reportRef.current;
+      const opt = {
+        margin:       [0.5, 0.5, 0.5, 0.5], // top, left, bottom, right
+        filename:     `Quantro_Report_${new Date().toISOString().slice(0,10)}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true, logging: false },
+        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' },
+        pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
+      };
+
+      // Clone element to remove print-hidden classes for PDF generation if needed, 
+      // but html2pdf handles visible DOM. 
+      // We temporarily show everything if hidden controls interfere, but our controls use .print:hidden which html2pdf respects if we use proper CSS or just hide them before gen.
+      // Actually, html2pdf snapshots the DOM. We can just pass the element.
+
+      window.html2pdf().set(opt).from(element).save();
+  };
 
   return (
-    <div className="fixed inset-0 z-[60] bg-white overflow-auto animate-in fade-in slide-in-from-bottom-4">
-      <div className="max-w-4xl mx-auto p-8 md:p-12 pb-24" id="printable-report">
+    <div className="fixed inset-0 z-[60] bg-slate-100 overflow-auto animate-in fade-in slide-in-from-bottom-4 flex flex-col items-center pt-8 pb-24">
+      
+      {/* Report Container (A4-ish look) */}
+      <div 
+        ref={reportRef} 
+        id="printable-report"
+        className="bg-white max-w-4xl w-full shadow-2xl min-h-[1100px] p-12 md:p-16 relative"
+      >
         {/* Report Header */}
-        <div className="flex justify-between items-end border-b-2 border-gray-800 pb-6 mb-8">
+        <div className="flex justify-between items-end border-b-2 border-slate-900 pb-8 mb-10">
           <div>
-            <h1 className="text-4xl font-extrabold text-gray-900 mb-2 tracking-tight">Executive Performance Report</h1>
-            <p className="text-gray-500 font-medium">Prepared for: <span className="text-gray-900">{typeof settings.userName === 'string' ? settings.userName : 'Manager'}</span></p>
+            <div className="flex items-center gap-2 mb-4">
+                 <div className="w-8 h-8 bg-violet-700 rounded-lg flex items-center justify-center text-white font-bold">Q</div>
+                 <span className="text-xl font-bold tracking-tight text-slate-900">Quantro Analytics</span>
+            </div>
+            <h1 className="text-4xl font-extrabold text-slate-900 mb-2 tracking-tight">Executive Performance Report</h1>
+            <p className="text-slate-500 font-medium">Prepared for: <span className="text-slate-900">{typeof settings.userName === 'string' ? settings.userName : 'Manager'}</span></p>
           </div>
           <div className="text-right">
-            <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mb-1">Generated On</p>
-            <p className="text-lg font-semibold text-gray-800">{dateStr}</p>
+            <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mb-1">Generated On</p>
+            <p className="text-lg font-semibold text-slate-800">{dateStr}</p>
           </div>
         </div>
-
+        
         {/* Executive Summary */}
-        <section className="mb-10 break-inside-avoid">
-          <h2 className="text-xl font-bold text-gray-800 uppercase tracking-wide mb-6 border-l-4 border-teal-500 pl-3">Executive Summary</h2>
-          <div className="grid grid-cols-4 gap-6">
-             <div className="p-5 bg-gray-50 rounded-xl border border-gray-100">
-                <p className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-2">Total Revenue</p>
-                <p className="text-3xl font-extrabold text-gray-900">{formatCurrency(summary.totalGmv, currency)}</p>
+        {showSummary && (
+        <section className="mb-12 break-inside-avoid">
+          <h2 className="text-lg font-bold text-slate-900 uppercase tracking-widest mb-6 flex items-center gap-2">
+              <span className="w-2 h-8 bg-violet-600 rounded-sm"></span> Executive Summary
+          </h2>
+          <div className="grid grid-cols-4 gap-4">
+             <div className="p-4 bg-slate-50 rounded-lg border border-slate-100">
+                <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-2">Total Revenue</p>
+                <p className="text-2xl font-extrabold text-slate-900">{formatCurrency(summary.totalGmv, currency)}</p>
              </div>
-             <div className="p-5 bg-gray-50 rounded-xl border border-gray-100">
-                <p className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-2">Total Orders</p>
-                <p className="text-3xl font-extrabold text-gray-900">{summary.totalOrders}</p>
+             <div className="p-4 bg-slate-50 rounded-lg border border-slate-100">
+                <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-2">Total Orders</p>
+                <p className="text-2xl font-extrabold text-slate-900">{summary.totalOrders}</p>
              </div>
-             <div className="p-5 bg-gray-50 rounded-xl border border-gray-100">
-                <p className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-2">Avg Order Value</p>
-                <p className="text-3xl font-extrabold text-gray-900">{formatCurrency(summary.avgOrderValue, currency)}</p>
+             <div className="p-4 bg-slate-50 rounded-lg border border-slate-100">
+                <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-2">Avg Order Value</p>
+                <p className="text-2xl font-extrabold text-slate-900">{formatCurrency(summary.avgOrderValue, currency)}</p>
              </div>
-             <div className="p-5 bg-gray-50 rounded-xl border border-gray-100">
-                <p className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-2">Conversion Rate</p>
-                <p className="text-3xl font-extrabold text-gray-900">{summary.conversionRate}</p>
+             <div className="p-4 bg-slate-50 rounded-lg border border-slate-100">
+                <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-2">Conversion Rate</p>
+                <p className="text-2xl font-extrabold text-slate-900">{summary.conversionRate}</p>
              </div>
           </div>
         </section>
+        )}
 
         {/* AI Strategic Analysis */}
-        <section className="mb-10 break-inside-avoid">
-          <h2 className="text-xl font-bold text-gray-800 uppercase tracking-wide mb-6 border-l-4 border-indigo-500 pl-3">Strategic Analysis (AI)</h2>
+        {showAI && (
+        <section className="mb-12 break-inside-avoid">
+          <h2 className="text-lg font-bold text-slate-900 uppercase tracking-widest mb-6 flex items-center gap-2">
+              <span className="w-2 h-8 bg-indigo-600 rounded-sm"></span> AI Strategic Analysis
+          </h2>
           <div className="space-y-4">
             {smartInsights.map((insight, idx) => {
               const Icon = insight.icon;
               return (
-              <div key={idx} className="flex gap-4 p-5 border border-gray-200 rounded-xl bg-white shadow-sm">
-                 <div className={`p-3 rounded-full h-fit bg-${insight.color}-100 text-${insight.color}-700`}>
-                    <Icon className="w-6 h-6" />
+              <div key={idx} className="flex gap-4 p-5 border border-slate-100 rounded-lg bg-white shadow-sm">
+                 <div className={`p-3 rounded-full h-fit bg-${insight.color}-50 text-${insight.color}-700`}>
+                    <Icon className="w-5 h-5" />
                  </div>
                  <div>
-                    <h3 className="font-bold text-gray-800 text-lg">{insight.title}</h3>
-                    <p className="text-gray-600 mt-1 leading-relaxed">{insight.text}</p>
+                    <h3 className="font-bold text-slate-800 text-base mb-1">{insight.title}</h3>
+                    <p className="text-slate-600 text-sm leading-relaxed">{insight.text}</p>
                  </div>
               </div>
               );
             })}
           </div>
         </section>
+        )}
 
         {/* Channel Breakdown */}
-        <section className="mb-10 break-inside-avoid">
-          <h2 className="text-xl font-bold text-gray-800 uppercase tracking-wide mb-6 border-l-4 border-rose-500 pl-3">Channel Performance</h2>
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        {showChannels && (
+        <section className="mb-12 break-inside-avoid">
+          <h2 className="text-lg font-bold text-slate-900 uppercase tracking-widest mb-6 flex items-center gap-2">
+              <span className="w-2 h-8 bg-rose-600 rounded-sm"></span> Channel Performance
+          </h2>
+          <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
               <table className="w-full text-sm text-left border-collapse">
               <thead>
-                  <tr className="bg-gray-50 border-b border-gray-200 text-gray-500 uppercase text-xs">
-                  <th className="p-4 font-bold tracking-wider">Channel</th>
-                  <th className="p-4 font-bold text-right tracking-wider">Revenue</th>
-                  <th className="p-4 font-bold text-right tracking-wider">Contribution</th>
+                  <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase text-[10px]">
+                  <th className="p-3 font-bold tracking-wider">Channel</th>
+                  <th className="p-3 font-bold text-right tracking-wider">Revenue</th>
+                  <th className="p-3 font-bold text-right tracking-wider">Contribution</th>
                   </tr>
               </thead>
               <tbody>
@@ -1060,71 +1325,113 @@ const ReportView = ({ settings, summary, smartInsights, channelData, currency, p
                       { name: 'Video Content', val: channelData.video, icon: Video },
                       { name: 'Live Streaming', val: channelData.live, icon: Eye }
                   ].map((c, i) => (
-                  <tr key={i} className="border-b border-gray-100 last:border-0">
-                      <td className="p-4 font-bold text-gray-800 flex items-center gap-3">
-                          <c.icon className="w-4 h-4 text-gray-400" />
+                  <tr key={i} className="border-b border-slate-100 last:border-0">
+                      <td className="p-3 font-bold text-slate-800 flex items-center gap-3">
+                          <c.icon className="w-4 h-4 text-slate-400" />
                           {c.name}
                       </td>
-                      <td className="p-4 text-right font-mono text-gray-600 font-medium">{formatCurrency(c.val, currency)}</td>
-                      <td className="p-4 text-right text-gray-500 font-medium">{(c.val / (summary.totalGmv || 1) * 100).toFixed(1)}%</td>
+                      <td className="p-3 text-right font-mono text-slate-600 font-medium">{formatCurrency(c.val, currency)}</td>
+                      <td className="p-3 text-right text-slate-500 font-medium">{(c.val / (summary.totalGmv || 1) * 100).toFixed(1)}%</td>
                   </tr>
                   ))}
               </tbody>
               </table>
           </div>
         </section>
+        )}
 
         {/* Top Products Table */}
         <section className="break-inside-avoid">
-          <h2 className="text-xl font-bold text-gray-800 uppercase tracking-wide mb-6 border-l-4 border-amber-500 pl-3">Key Inventory Drivers (Class A)</h2>
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <h2 className="text-lg font-bold text-slate-900 uppercase tracking-widest mb-6 flex items-center gap-2">
+              <span className="w-2 h-8 bg-amber-500 rounded-sm"></span> Key Inventory Drivers (Class A)
+          </h2>
+          <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
               <table className="w-full text-sm text-left border-collapse">
               <thead>
-                  <tr className="bg-gray-50 border-b border-gray-200 text-gray-500 uppercase text-xs">
-                  <th className="p-4 font-bold tracking-wider">Product Name</th>
-                  <th className="p-4 font-bold text-right tracking-wider">GMV</th>
-                  <th className="p-4 font-bold text-center tracking-wider">Sold</th>
-                  <th className="p-4 font-bold text-center tracking-wider">Status</th>
+                  <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase text-[10px]">
+                  <th className="p-3 font-bold tracking-wider">Product Name</th>
+                  <th className="p-3 font-bold text-right tracking-wider">GMV</th>
+                  <th className="p-3 font-bold text-center tracking-wider">Sold</th>
+                  <th className="p-3 font-bold text-center tracking-wider">Status</th>
                   </tr>
               </thead>
               <tbody>
                   {processedProducts.filter(p => p.abcCategory === 'A').slice(0, 10).map((p, i) => (
-                  <tr key={i} className="border-b border-gray-100 last:border-0">
-                      <td className="p-4 font-medium text-gray-800 truncate max-w-[300px]">{p.name}</td>
-                      <td className="p-4 text-right font-mono text-gray-600 font-medium">{formatCurrency(p.gmv, currency)}</td>
-                      <td className="p-4 text-center text-gray-600">{p.itemsSold}</td>
-                      <td className="p-4 text-center"><span className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-bold">{p.status}</span></td>
+                  <tr key={i} className="border-b border-slate-100 last:border-0">
+                      <td className="p-3 font-medium text-slate-800 truncate max-w-[300px]">{p.name}</td>
+                      <td className="p-3 text-right font-mono text-slate-600 font-medium">{formatCurrency(p.gmv, currency)}</td>
+                      <td className="p-3 text-center text-slate-600">{p.itemsSold}</td>
+                      <td className="p-3 text-center"><span className="px-2 py-1 bg-emerald-50 text-emerald-700 rounded text-[10px] font-bold">{p.status}</span></td>
                   </tr>
                   ))}
                   {processedProducts.filter(p => p.abcCategory === 'A').length === 0 && (
                       <tr>
-                          <td colSpan="4" className="p-8 text-center text-gray-400 italic">No Class A products found in current filter.</td>
+                          <td colSpan="4" className="p-8 text-center text-slate-400 italic">No Class A products found in current filter.</td>
                       </tr>
                   )}
               </tbody>
               </table>
           </div>
         </section>
+
+        {/* Printable Notes Display */}
+        {note && (
+            <section className="mt-8 break-inside-avoid">
+                <h2 className="text-sm font-bold text-slate-900 uppercase tracking-widest mb-4 border-l-2 border-slate-300 pl-2">Executive Notes</h2>
+                <div className="p-6 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 italic font-serif">
+                    "{note}"
+                </div>
+            </section>
+        )}
         
-        <div className="mt-16 pt-8 border-t border-gray-200 text-center">
-           <p className="text-gray-400 text-sm font-medium">Generated by ShopPro Analytics System • End of Report</p>
+        <div className="mt-16 pt-8 border-t border-slate-200 text-center">
+           <p className="text-slate-400 text-xs font-medium">Generated by Quantro Analytics • Confidential</p>
         </div>
       </div>
 
       {/* Floating Actions */}
-      <div className="fixed bottom-8 right-8 flex gap-4 print:hidden z-50">
-        <button 
-          onClick={() => setActiveView('dashboard')}
-          className="px-6 py-3 bg-white text-gray-700 border border-gray-200 rounded-full font-bold shadow-lg hover:bg-gray-50 transition-colors"
-        >
-          Close View
-        </button>
-        <button 
-          onClick={() => window.print()}
-          className="px-6 py-3 bg-gray-900 text-white rounded-full font-bold shadow-xl hover:bg-black transition-transform hover:-translate-y-1 flex items-center gap-3"
-        >
-          <Printer className="w-5 h-5" /> Print / Save PDF
-        </button>
+      <div className="fixed top-8 right-8 flex flex-col gap-4 print:hidden z-50">
+          <div className="bg-white p-4 rounded-xl shadow-xl border border-slate-200 space-y-3 w-64">
+             <h3 className="text-sm font-bold text-slate-900">Report Settings</h3>
+             <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
+                <input type="checkbox" checked={showSummary} onChange={e => setShowSummary(e.target.checked)} className="accent-violet-600 rounded"/> Summary
+            </label>
+            <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
+                <input type="checkbox" checked={showAI} onChange={e => setShowAI(e.target.checked)} className="accent-violet-600 rounded"/> AI Insights
+            </label>
+            <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
+                <input type="checkbox" checked={showChannels} onChange={e => setShowChannels(e.target.checked)} className="accent-violet-600 rounded"/> Channels
+            </label>
+             <textarea 
+                className="w-full p-2 border border-slate-200 rounded-lg text-xs text-slate-700 focus:ring-1 focus:ring-violet-500 outline-none resize-none"
+                rows="3"
+                placeholder="Add notes..."
+                value={note}
+                onChange={e => setNote(e.target.value)}
+            ></textarea>
+
+            <div className="pt-2 flex flex-col gap-2">
+                <button 
+                  onClick={handleDownloadPDF}
+                  disabled={!pdfReady}
+                  className="w-full py-2 bg-violet-600 text-white rounded-lg font-bold shadow-md hover:bg-violet-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Download className="w-4 h-4" /> {pdfReady ? 'Download PDF' : 'Loading Engine...'}
+                </button>
+                <button 
+                  onClick={() => window.print()}
+                  className="w-full py-2 bg-white text-slate-700 border border-slate-200 rounded-lg font-medium hover:bg-slate-50 transition-colors flex items-center justify-center gap-2"
+                >
+                  <Printer className="w-4 h-4" /> Print
+                </button>
+                <button 
+                    onClick={() => setActiveView('dashboard')}
+                    className="w-full py-2 text-slate-400 text-xs hover:text-slate-600"
+                >
+                    Close Preview
+                </button>
+            </div>
+          </div>
       </div>
 
       <style>{`
@@ -1138,9 +1445,9 @@ const ReportView = ({ settings, summary, smartInsights, channelData, currency, p
             left: 0;
             top: 0;
             width: 100%;
-            max-width: 100%;
-            padding: 2cm;
             margin: 0;
+            box-shadow: none;
+            padding: 0;
           }
           .print\\:hidden { display: none !important; }
         }
@@ -1149,41 +1456,41 @@ const ReportView = ({ settings, summary, smartInsights, channelData, currency, p
   );
 };
 
-const SettingsView = ({ settings, setSettings, uploadedFiles, clearData, addNotification }) => (
-  <div className="bg-white/60 backdrop-blur-md rounded-3xl p-6 shadow-sm border border-white/50 h-full flex flex-col animate-in fade-in slide-in-from-bottom-4">
+const SettingsView = ({ settings, setSettings, uploadedFiles, clearData, addNotification, visibleKPIs, setVisibleKPIs }) => (
+  <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 h-full flex flex-col animate-in fade-in slide-in-from-bottom-4">
      <div className="flex items-center gap-3 mb-6">
-        <div className="p-3 bg-teal-100 rounded-xl">
-           <Settings className="w-6 h-6 text-teal-700" />
+        <div className="p-3 bg-violet-100 rounded-lg">
+           <Settings className="w-6 h-6 text-violet-700" />
         </div>
         <div>
-          <h2 className="text-xl font-bold text-gray-800">System Configuration</h2>
-          <p className="text-sm text-gray-500">Customize how ShopPro analyzes your data</p>
+          <h2 className="text-xl font-bold text-slate-800">System Configuration</h2>
+          <p className="text-sm text-slate-500">Customize how Quantro analyzes your data</p>
         </div>
      </div>
 
      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* General Settings */}
         <div className="space-y-6">
-          <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">General Preferences</h3>
+          <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider">General Preferences</h3>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Display Name</label>
+            <label className="block text-sm font-medium text-slate-700 mb-2">Display Name</label>
             <input 
               type="text" 
               value={settings.userName}
               onChange={(e) => setSettings({...settings, userName: e.target.value})}
-              className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-teal-500/50"
+              className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500/50"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Currency Symbol</label>
+            <label className="block text-sm font-medium text-slate-700 mb-2">Currency Symbol</label>
             <div className="flex gap-2">
               {['฿', '$', '€', '£', '¥'].map(curr => (
                 <button
                   key={curr}
                   onClick={() => setSettings({...settings, currency: curr})}
-                  className={`w-10 h-10 rounded-lg font-bold transition-all ${settings.currency === curr ? 'bg-teal-600 text-white shadow-md' : 'bg-white border border-gray-200 hover:bg-gray-50'}`}
+                  className={`w-10 h-10 rounded-lg font-bold transition-all ${settings.currency === curr ? 'bg-violet-600 text-white shadow-md' : 'bg-white border border-slate-200 hover:bg-slate-50'}`}
                 >
                   {curr}
                 </button>
@@ -1191,23 +1498,41 @@ const SettingsView = ({ settings, setSettings, uploadedFiles, clearData, addNoti
             </div>
           </div>
 
-          <div className="pt-6 border-t border-gray-200">
-             <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Data Management</h3>
+          <div className="pt-6 border-t border-slate-200">
+            <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Dashboard Customization</h3>
+            <div className="space-y-3 bg-slate-50 p-4 rounded-lg border border-slate-200">
+               <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-slate-700">Total GMV</span>
+                  <input type="checkbox" checked={visibleKPIs.totalGMV} onChange={(e) => setVisibleKPIs({...visibleKPIs, totalGMV: e.target.checked})} className="accent-violet-600 w-5 h-5 rounded"/>
+               </div>
+               <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-slate-700">Avg Order Value</span>
+                  <input type="checkbox" checked={visibleKPIs.avgOrderValue} onChange={(e) => setVisibleKPIs({...visibleKPIs, avgOrderValue: e.target.checked})} className="accent-violet-600 w-5 h-5 rounded"/>
+               </div>
+               <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-slate-700">Conversion Rate</span>
+                  <input type="checkbox" checked={visibleKPIs.conversionRate} onChange={(e) => setVisibleKPIs({...visibleKPIs, conversionRate: e.target.checked})} className="accent-violet-600 w-5 h-5 rounded"/>
+               </div>
+            </div>
+          </div>
+
+          <div className="pt-6 border-t border-slate-200">
+             <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Data Management</h3>
              
              {/* Data Sources List */}
              <div className="mb-4">
-                 <label className="block text-sm font-medium text-gray-700 mb-2">Loaded Data Sources</label>
+                 <label className="block text-sm font-medium text-slate-700 mb-2">Loaded Data Sources</label>
                  {uploadedFiles.length === 0 ? (
-                     <div className="text-sm text-gray-400 italic p-3 bg-gray-50 rounded-lg border border-gray-200 text-center">
+                     <div className="text-sm text-slate-400 italic p-3 bg-slate-50 rounded-lg border border-slate-200 text-center">
                          No files uploaded yet
                      </div>
                  ) : (
                      <div className="space-y-2">
                          {uploadedFiles.map((file, i) => (
-                             <div key={i} className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg shadow-sm">
+                             <div key={i} className="flex items-center justify-between p-3 bg-white border border-slate-200 rounded-lg shadow-sm">
                                  <div className="flex items-center gap-2">
-                                     <Database className="w-4 h-4 text-teal-600" />
-                                     <span className="text-sm text-gray-700 font-medium">{file}</span>
+                                     <Database className="w-4 h-4 text-violet-600" />
+                                     <span className="text-sm text-slate-700 font-medium">{typeof file === 'string' ? file : file.name}</span>
                                  </div>
                                  <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full font-bold">Active</span>
                              </div>
@@ -1218,7 +1543,7 @@ const SettingsView = ({ settings, setSettings, uploadedFiles, clearData, addNoti
 
              <button 
                 onClick={clearData}
-                className="w-full flex items-center justify-center gap-2 text-rose-600 hover:text-white hover:bg-rose-600 font-medium text-sm px-4 py-3 border border-rose-200 rounded-xl transition-colors"
+                className="w-full flex items-center justify-center gap-2 text-rose-600 hover:text-white hover:bg-rose-600 font-medium text-sm px-4 py-3 border border-rose-200 rounded-lg transition-colors"
              >
                 <Trash2 className="w-4 h-4" /> Clear All Data Sources
              </button>
@@ -1227,62 +1552,62 @@ const SettingsView = ({ settings, setSettings, uploadedFiles, clearData, addNoti
 
         {/* AI Thresholds */}
         <div className="space-y-6">
-          <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
+          <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
              <Lightbulb className="w-4 h-4" /> Smart Assistant Thresholds
           </h3>
           
-          <div className="bg-white/50 p-4 rounded-2xl border border-gray-100 space-y-4">
+          <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-slate-700 mb-1">
                  High Traffic Threshold (Views)
-                 <span className="text-xs text-gray-400 font-normal ml-2">Defines "Funnel Leak"</span>
+                 <span className="text-xs text-slate-400 font-normal ml-2">Defines "Funnel Leak"</span>
               </label>
               <input 
                 type="number" 
                 value={settings.highViewThreshold}
                 onChange={(e) => setSettings({...settings, highViewThreshold: parseInt(e.target.value)})}
-                className="w-full px-4 py-2 rounded-xl border border-gray-200"
+                className="w-full px-4 py-2 rounded-lg border border-slate-200"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-slate-700 mb-1">
                  Low Conversion Alert (%)
-                 <span className="text-xs text-gray-400 font-normal ml-2">Alert if CVR falls below this</span>
+                 <span className="text-xs text-slate-400 font-normal ml-2">Alert if CVR falls below this</span>
               </label>
               <input 
                 type="number" 
                 step="0.1"
                 value={settings.lowCvrThreshold}
                 onChange={(e) => setSettings({...settings, lowCvrThreshold: parseFloat(e.target.value)})}
-                className="w-full px-4 py-2 rounded-xl border border-gray-200"
+                className="w-full px-4 py-2 rounded-lg border border-slate-200"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-slate-700 mb-1">
                  Hidden Gem CVR (%)
-                 <span className="text-xs text-gray-400 font-normal ml-2">Target CVR for opportunities</span>
+                 <span className="text-xs text-slate-400 font-normal ml-2">Target CVR for opportunities</span>
               </label>
               <input 
                 type="number" 
                 step="0.1"
                 value={settings.hiddenGemCvr}
                 onChange={(e) => setSettings({...settings, hiddenGemCvr: parseFloat(e.target.value)})}
-                className="w-full px-4 py-2 rounded-xl border border-gray-200"
+                className="w-full px-4 py-2 rounded-lg border border-slate-200"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-slate-700 mb-1">
                  Dead Stock Threshold (Sales)
-                 <span className="text-xs text-gray-400 font-normal ml-2">Items sold less than this</span>
+                 <span className="text-xs text-slate-400 font-normal ml-2">Items sold less than this</span>
               </label>
               <input 
                 type="number" 
                 value={settings.deadStockThreshold}
                 onChange={(e) => setSettings({...settings, deadStockThreshold: parseInt(e.target.value)})}
-                className="w-full px-4 py-2 rounded-xl border border-gray-200"
+                className="w-full px-4 py-2 rounded-lg border border-slate-200"
               />
             </div>
           </div>
@@ -1290,7 +1615,7 @@ const SettingsView = ({ settings, setSettings, uploadedFiles, clearData, addNoti
           <div className="flex justify-end">
              <button 
                 onClick={() => addNotification("Settings saved successfully")}
-                className="flex items-center gap-2 bg-teal-600 text-white px-6 py-2 rounded-xl font-bold shadow-md hover:bg-teal-700 transition-transform active:scale-95"
+                className="flex items-center gap-2 bg-violet-600 text-white px-6 py-2 rounded-lg font-bold shadow-md hover:bg-violet-700 transition-transform active:scale-95"
              >
                 <Save className="w-4 h-4" /> Save Changes
              </button>
@@ -1299,6 +1624,137 @@ const SettingsView = ({ settings, setSettings, uploadedFiles, clearData, addNoti
      </div>
   </div>
 );
+
+const AboutView = () => (
+    <div className="bg-white rounded-xl p-8 shadow-sm border border-slate-200 h-full overflow-y-auto animate-in fade-in slide-in-from-bottom-4">
+        <div className="max-w-3xl mx-auto">
+            <h1 className="text-3xl font-bold text-slate-800 mb-6 flex items-center gap-3">
+                <div className="w-10 h-10 bg-violet-600 rounded-lg flex items-center justify-center text-white text-xl">Q</div>
+                Quantro
+            </h1>
+            
+            <div className="prose prose-violet max-w-none">
+                <p className="text-lg text-slate-600 mb-8">
+                    Quantro is an enterprise-grade analytics dashboard designed to solve the fragmentation of e-commerce data. We replace messy spreadsheets with a centralized intelligence hub.
+                </p>
+
+                <h3 className="text-xl font-bold text-slate-800 mt-8 mb-4 flex items-center gap-2">
+                    <BookOpen className="w-5 h-5 text-violet-600" /> User Manual & Glossary
+                </h3>
+                
+                <div className="space-y-4">
+                    <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 shadow-sm">
+                        <h4 className="font-bold text-slate-800 mb-2">Key Metrics</h4>
+                        <ul className="space-y-2 text-sm text-slate-600">
+                            <li><strong>GMV (Gross Merchandise Value):</strong> Total sales revenue before any deductions.</li>
+                            <li><strong>CTR (Click-Through Rate):</strong> Percentage of people who saw your product and clicked on it.</li>
+                            <li><strong>CVR (Conversion Rate):</strong> Percentage of visitors who actually bought the product.</li>
+                        </ul>
+                    </div>
+
+                    <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 shadow-sm">
+                        <h4 className="font-bold text-slate-800 mb-2">Smart Analysis</h4>
+                        <ul className="space-y-2 text-sm text-slate-600">
+                            <li><strong>ABC Analysis:</strong> 
+                                <span className="ml-1 px-1.5 py-0.5 bg-violet-100 text-violet-700 rounded text-xs font-bold">Class A</span> (Top 80% Revenue), 
+                                <span className="ml-1 px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded text-xs font-bold">Class B</span> (Next 15%), 
+                                <span className="ml-1 px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-xs font-bold">Class C</span> (Bottom 5%).
+                            </li>
+                            <li><strong>Funnel Leak:</strong> High views but low sales. Usually means price or description issues.</li>
+                            <li><strong>Hidden Gem:</strong> Low views but high conversion. Needs more traffic (Ads/Live).</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+);
+
+const LandingPage = ({ onLogin }) => {
+    const [name, setName] = useState('');
+    const [password, setPassword] = useState('');
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        // Simulated hardcoded credential check for "generated" password
+        if (password === 'admin123') {
+            onLogin(name || 'Manager');
+        } else {
+            alert("Invalid Access Key. Please contact support.");
+        }
+    };
+
+    return (
+        <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl shadow-2xl overflow-hidden max-w-4xl w-full flex flex-col md:flex-row">
+                <div className="p-12 md:w-1/2 flex flex-col justify-center bg-violet-50">
+                    <div className="w-16 h-16 bg-violet-700 rounded-xl flex items-center justify-center text-white text-3xl font-bold mb-6 shadow-lg shadow-violet-700/30">Q</div>
+                    <h1 className="text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">Quantro</h1>
+                    <p className="text-slate-600 text-lg mb-8 leading-relaxed">
+                        The centralized intelligence hub for multi-platform e-commerce brands. Stop guessing, start knowing.
+                    </p>
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-3 text-slate-700">
+                            <CheckCircle2 className="w-5 h-5 text-violet-600" />
+                            <span>Lifetime Data Aggregation</span>
+                        </div>
+                        <div className="flex items-center gap-3 text-slate-700">
+                            <CheckCircle2 className="w-5 h-5 text-violet-600" />
+                            <span>Profitability Analysis</span>
+                        </div>
+                        <div className="flex items-center gap-3 text-slate-700">
+                            <CheckCircle2 className="w-5 h-5 text-violet-600" />
+                            <span>Cross-Channel Attribution</span>
+                        </div>
+                    </div>
+                </div>
+                <div className="p-12 md:w-1/2 bg-white flex flex-col justify-center">
+                    <h2 className="text-2xl font-bold text-slate-800 mb-6">Welcome Back</h2>
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-2">Organization Name</label>
+                            <div className="relative">
+                                <User className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
+                                <input 
+                                    type="text" 
+                                    required
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    placeholder="e.g. Siam Beauty"
+                                    className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none transition-all"
+                                />
+                            </div>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-2">Access Key</label>
+                            <div className="relative">
+                                <Lock className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
+                                <input 
+                                    type="password" 
+                                    required
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    placeholder="Enter your license key"
+                                    className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none transition-all"
+                                />
+                            </div>
+                            <p className="text-xs text-slate-400 mt-1">Use 'admin123' for demo access</p>
+                        </div>
+                        <button 
+                            type="submit"
+                            className="w-full bg-violet-600 text-white font-bold py-3 rounded-lg hover:bg-violet-700 transition-transform active:scale-95 flex items-center justify-center gap-2 shadow-lg shadow-violet-200"
+                        >
+                            Access Dashboard <ArrowRight className="w-5 h-5" />
+                        </button>
+                    </form>
+                    <p className="mt-8 text-center text-xs text-slate-400">
+                        Enterprise Grade Security • 256-bit Encryption
+                    </p>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 // --- MAIN APP ---
 
@@ -1311,7 +1767,16 @@ export default function App() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [notifications, setNotifications] = useState([]);
   const [isExcelReady, setIsExcelReady] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState([]); 
   const [timePeriod, setTimePeriod] = useState('All Time'); 
+  const [profileOpen, setProfileOpen] = useState(false); 
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Check auth state on load
+  useEffect(() => {
+      const auth = localStorage.getItem('shopProAuth');
+      if (auth) setIsAuthenticated(true);
+  }, []);
 
   // Smart Settings State
   const [settings, setSettings] = useState(() => {
@@ -1323,7 +1788,7 @@ export default function App() {
         lowCvrThreshold: 0.5,
         hiddenGemCvr: 3.0,
         deadStockThreshold: 0,
-        userName: 'Shop Manager'
+        userName: 'Manager'
       };
     } catch (e) {
       return {
@@ -1332,8 +1797,22 @@ export default function App() {
         lowCvrThreshold: 0.5,
         hiddenGemCvr: 3.0,
         deadStockThreshold: 0,
-        userName: 'Shop Manager'
+        userName: 'Manager'
       };
+    }
+  });
+
+  // Custom KPI Visibility State
+  const [visibleKPIs, setVisibleKPIs] = useState(() => {
+    try {
+      const saved = localStorage.getItem('shopProKPIs');
+      return saved ? JSON.parse(saved) : {
+        totalGMV: true,
+        avgOrderValue: true,
+        conversionRate: true
+      };
+    } catch(e) {
+      return { totalGMV: true, avgOrderValue: true, conversionRate: true };
     }
   });
 
@@ -1371,7 +1850,7 @@ export default function App() {
   });
 
   // Persistent Uploaded Files State
-  const [uploadedFiles, setUploadedFiles] = useState(() => {
+  const [uploadedFilesState, setUploadedFilesState] = useState(() => { 
       try {
           const savedFiles = localStorage.getItem('shopProFiles');
           return savedFiles ? JSON.parse(savedFiles) : [];
@@ -1379,8 +1858,22 @@ export default function App() {
           return [];
       }
   });
+  
+  // Sync state variable name
+  useEffect(() => {
+     setUploadedFiles(uploadedFilesState); 
+  }, []);
+
+  // Persistent Campaigns State
+  const [campaigns, setCampaigns] = useState(() => {
+      try {
+          const saved = localStorage.getItem('shopProCampaigns');
+          return saved ? JSON.parse(saved) : [];
+      } catch(e) { return []; }
+  });
 
   const fileInputRef = useRef(null);
+  const profileRef = useRef(null); 
 
   // --- Effects to Save State ---
 
@@ -1389,12 +1882,31 @@ export default function App() {
   }, [settings]);
 
   useEffect(() => {
+    localStorage.setItem('shopProKPIs', JSON.stringify(visibleKPIs));
+  }, [visibleKPIs]);
+
+  useEffect(() => {
     localStorage.setItem('shopProProducts', JSON.stringify(products));
   }, [products]);
 
   useEffect(() => {
     localStorage.setItem('shopProFiles', JSON.stringify(uploadedFiles));
   }, [uploadedFiles]);
+
+  useEffect(() => {
+    localStorage.setItem('shopProCampaigns', JSON.stringify(campaigns));
+  }, [campaigns]); 
+
+  // Click outside to close profile dropdown
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setProfileOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [profileRef]);
 
   useEffect(() => {
     if (window.XLSX) {
@@ -1414,6 +1926,18 @@ export default function App() {
     const id = Date.now();
     setNotifications(prev => [...prev, { id, msg, type }]);
     setTimeout(() => setNotifications(prev => prev.filter(n => n.id !== id)), 4000);
+  };
+
+  const handleLogin = (name) => {
+      setSettings(prev => ({...prev, userName: name}));
+      setIsAuthenticated(true);
+      localStorage.setItem('shopProAuth', 'true');
+  };
+
+  const handleLogout = () => {
+      setIsAuthenticated(false);
+      localStorage.removeItem('shopProAuth');
+      setProfileOpen(false);
   };
 
   const calculateABC = (items) => {
@@ -1499,7 +2023,7 @@ export default function App() {
     const file = e.target.files[0];
     if (!file) return;
 
-    if (uploadedFiles.includes(file.name)) {
+    if (uploadedFiles.some(f => (typeof f === 'string' ? f : f.name) === file.name)) {
         if(!window.confirm(`File "${file.name}" has already been uploaded. Do you want to process it again (it will overwrite duplicates)?`)) {
             return;
         }
@@ -1559,7 +2083,14 @@ export default function App() {
             return calculateABC(merged);
         });
 
-        setUploadedFiles(prev => [...new Set([...prev, file.name])]);
+        // Store file metadata for Calendar
+        setUploadedFiles(prev => {
+            const newFile = { name: file.name, date: new Date().toISOString() };
+            // Filter out old string-only entries if mixing or if re-uploading same name
+            const filtered = prev.filter(f => (typeof f === 'string' ? f : f.name) !== file.name);
+            return [...filtered, newFile];
+        });
+        
         setActiveView('dashboard');
         addNotification(`Imported ${normalized.length} products from ${file.name}`);
         
@@ -1719,10 +2250,16 @@ export default function App() {
     return sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />;
   };
 
+  // --- RENDERING ---
+
+  if (!isAuthenticated) {
+      return <LandingPage onLogin={handleLogin} />;
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cyan-100 via-blue-100 to-indigo-200 p-4 md:p-6 font-sans text-slate-800 transition-colors duration-500">
+    <div className="min-h-screen bg-slate-100 p-4 md:p-6 font-sans text-slate-800 transition-colors duration-500">
       <div className="max-w-[1600px] mx-auto h-[calc(100vh-2rem)] md:h-[calc(100vh-3rem)]">
-        <div className="bg-white/70 backdrop-blur-lg rounded-[2rem] shadow-2xl overflow-hidden h-full flex flex-col md:flex-row border border-white/40">
+        <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl overflow-hidden h-full flex flex-col md:flex-row border border-slate-200">
             <Sidebar 
                 activeView={activeView} 
                 setActiveView={setActiveView} 
@@ -1731,26 +2268,63 @@ export default function App() {
                 handleFileUpload={handleFileUpload} 
             />
 
-            <div className="flex-1 p-6 md:p-8 overflow-y-auto overflow-x-hidden scrollbar-hide relative">
-              <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4 sticky top-0 z-20 bg-white/80 backdrop-blur-md rounded-xl p-4 shadow-sm border border-white/50 transition-all">
+            <div className="flex-1 p-6 md:p-8 overflow-y-auto overflow-x-hidden scrollbar-hide relative bg-white">
+              <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4 sticky top-0 z-20 bg-white/90 backdrop-blur-md rounded-lg p-4 shadow-sm border border-slate-100 transition-all">
                 <div>
-                  <p className="text-teal-600 font-bold text-sm mb-1 tracking-wide uppercase opacity-80">
+                  <p className="text-violet-600 font-bold text-sm mb-1 tracking-wide uppercase opacity-80">
                     {activeView === 'dashboard' ? 'Overview' : activeView === 'inventory' ? 'Management' : activeView === 'reports' ? 'Documentation' : activeView === 'settings' ? 'System' : 'Module'}
                   </p>
-                  <h2 className="text-3xl md:text-4xl font-extrabold text-gray-800 tracking-tight drop-shadow-sm capitalize">
-                    {activeView === 'dashboard' ? 'Shop Analytics' : activeView === 'inventory' ? 'Product Inventory' : activeView === 'reports' ? 'Performance Reports' : activeView === 'settings' ? 'Settings' : activeView}
+                  <h2 className="text-3xl md:text-4xl font-extrabold text-slate-800 tracking-tight drop-shadow-sm capitalize">
+                    {activeView === 'dashboard' ? 'Quantro Intelligence' : activeView}
                   </h2>
                 </div>
                 <div className="flex items-center gap-4 self-end md:self-auto">
-                  <div className="flex items-center gap-3 pl-4 border-l-2 border-gray-200">
-                    <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold border-2 border-white shadow-sm ring-2 ring-indigo-50">
-                        {typeof settings.userName === 'string' ? settings.userName.charAt(0) : 'S'}
-                    </div>
-                    <div className="hidden sm:block leading-tight">
-                        <p className="font-bold text-gray-700 text-sm">{typeof settings.userName === 'string' ? settings.userName : 'Manager'}</p>
-                        <p className="text-[10px] text-gray-500 font-mono">ID: 883921</p>
-                    </div>
-                  </div>
+                   
+                   {/* Profile Dropdown */}
+                   <div className="relative" ref={profileRef}>
+                      <button 
+                        onClick={() => setProfileOpen(!profileOpen)}
+                        className="flex items-center gap-3 pl-4 border-l-2 border-slate-100 hover:opacity-80 transition-opacity"
+                      >
+                        <div className="w-10 h-10 bg-violet-50 rounded-full flex items-center justify-center text-violet-600 font-bold border-2 border-white shadow-sm ring-2 ring-violet-50">
+                            {typeof settings.userName === 'string' ? settings.userName.charAt(0) : 'Q'}
+                        </div>
+                        <div className="hidden sm:block leading-tight text-left">
+                            <p className="font-bold text-slate-700 text-sm">{typeof settings.userName === 'string' ? settings.userName : 'Manager'}</p>
+                            <p className="text-[10px] text-slate-500 font-mono">ID: 883921</p>
+                        </div>
+                        <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${profileOpen ? 'rotate-180' : ''}`} />
+                      </button>
+
+                      {profileOpen && (
+                          <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50 animate-in fade-in slide-in-from-top-2">
+                              <div className="px-4 py-2 border-b border-slate-50 mb-1">
+                                  <p className="text-xs font-bold text-slate-400 uppercase">Account</p>
+                              </div>
+                              <button 
+                                onClick={() => { setActiveView('settings'); setProfileOpen(false); }}
+                                className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2"
+                              >
+                                  <Settings className="w-4 h-4" /> Configuration
+                              </button>
+                              <button 
+                                onClick={() => { setActiveView('about'); setProfileOpen(false); }}
+                                className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2"
+                              >
+                                  <BookOpen className="w-4 h-4" /> User Manual
+                              </button>
+                              <div className="border-t border-slate-50 mt-1 pt-1">
+                                <button 
+                                  onClick={handleLogout}
+                                  className="w-full text-left px-4 py-2 text-sm text-rose-600 hover:bg-rose-50 flex items-center gap-2"
+                                >
+                                    <LogOut className="w-4 h-4" /> Sign Out
+                                </button>
+                              </div>
+                          </div>
+                      )}
+                   </div>
+
                 </div>
               </div>
 
@@ -1767,6 +2341,7 @@ export default function App() {
                     platformFilter={platformFilter} 
                     setPlatformFilter={setPlatformFilter} 
                     availablePlatforms={availablePlatforms}
+                    visibleKPIs={visibleKPIs}
                 />
               )}
               {activeView === 'inventory' && (
@@ -1784,7 +2359,20 @@ export default function App() {
                 />
               )}
               {activeView === 'media' && <MediaView products={processedProducts} currency={settings.currency} />}
-              {activeView === 'campaigns' && <CampaignView products={products} currency={settings.currency} />}
+              {activeView === 'campaigns' && (
+                  <CampaignView 
+                      products={products} 
+                      currency={settings.currency} 
+                      campaigns={campaigns} 
+                      setCampaigns={setCampaigns}
+                  />
+              )}
+              {activeView === 'calendar' && (
+                  <CalendarView 
+                      uploadedFiles={uploadedFiles} 
+                      campaigns={campaigns} 
+                  />
+              )}
               {activeView === 'finance' && <FinanceView products={processedProducts} currency={settings.currency} />}
               {activeView === 'reports' && (
                 <ReportView 
@@ -1804,8 +2392,11 @@ export default function App() {
                     uploadedFiles={uploadedFiles} 
                     clearData={clearData} 
                     addNotification={addNotification}
+                    visibleKPIs={visibleKPIs}
+                    setVisibleKPIs={setVisibleKPIs}
                 />
               )}
+              {activeView === 'about' && <AboutView />}
             </div>
         </div>
       </div>
@@ -1813,8 +2404,8 @@ export default function App() {
       {/* Toast Notifications */}
       <div className="fixed bottom-6 right-6 space-y-2 z-50">
          {notifications.map(n => (
-           <div key={n.id} className={`text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-3 animate-in slide-in-from-right-10 fade-in ${n.type === 'error' ? 'bg-red-600' : 'bg-gray-800'}`}>
-              {n.type === 'error' ? <AlertTriangle className="w-5 h-5 text-white" /> : <CheckCircle2 className="w-5 h-5 text-green-400" />}
+           <div key={n.id} className={`text-white px-4 py-3 rounded-lg shadow-xl flex items-center gap-3 animate-in slide-in-from-right-10 fade-in ${n.type === 'error' ? 'bg-red-600' : 'bg-slate-800'}`}>
+              {n.type === 'error' ? <AlertTriangle className="w-5 h-5 text-white" /> : <CheckCircle2 className="w-5 h-5 text-emerald-400" />}
               {n.msg}
            </div>
          ))}
