@@ -960,7 +960,6 @@ export default function App() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [notifications, setNotifications] = useState([]);
   const [isExcelReady, setIsExcelReady] = useState(false);
-  const [uploadedFiles, setUploadedFiles] = useState([]); 
   const [timePeriod, setTimePeriod] = useState('All Time'); 
 
   // Smart Settings State
@@ -987,21 +986,6 @@ export default function App() {
     }
   });
 
-  useEffect(() => {
-    localStorage.setItem('shopProSettings', JSON.stringify(settings));
-  }, [settings]);
-
-  useEffect(() => {
-    if (window.XLSX) {
-      setIsExcelReady(true);
-      return;
-    }
-    const script = document.createElement('script');
-    script.src = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
-    script.onload = () => setIsExcelReady(true);
-    document.body.appendChild(script);
-  }, []);
-
   const initialProducts = [
     {
       id: "1.7319588994789896e+18",
@@ -1025,8 +1009,53 @@ export default function App() {
     }
   ];
 
-  const [products, setProducts] = useState(initialProducts);
+  // Persistent Product State
+  const [products, setProducts] = useState(() => {
+    try {
+        const savedProducts = localStorage.getItem('shopProProducts');
+        return savedProducts ? JSON.parse(savedProducts) : initialProducts;
+    } catch (e) {
+        return initialProducts;
+    }
+  });
+
+  // Persistent Uploaded Files State
+  const [uploadedFiles, setUploadedFiles] = useState(() => {
+      try {
+          const savedFiles = localStorage.getItem('shopProFiles');
+          return savedFiles ? JSON.parse(savedFiles) : [];
+      } catch (e) {
+          return [];
+      }
+  });
+
   const fileInputRef = useRef(null);
+
+  // --- Effects to Save State ---
+
+  useEffect(() => {
+    localStorage.setItem('shopProSettings', JSON.stringify(settings));
+  }, [settings]);
+
+  useEffect(() => {
+    localStorage.setItem('shopProProducts', JSON.stringify(products));
+  }, [products]);
+
+  useEffect(() => {
+    localStorage.setItem('shopProFiles', JSON.stringify(uploadedFiles));
+  }, [uploadedFiles]);
+
+  useEffect(() => {
+    if (window.XLSX) {
+      setIsExcelReady(true);
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
+    script.onload = () => setIsExcelReady(true);
+    document.body.appendChild(script);
+  }, []);
+
 
   // --- Helpers that need state access ---
 
@@ -1225,6 +1254,8 @@ export default function App() {
       if(window.confirm("Are you sure you want to clear all data? This cannot be undone.")) {
           setProducts([]);
           setUploadedFiles([]);
+          localStorage.removeItem('shopProProducts');
+          localStorage.removeItem('shopProFiles');
           addNotification("All data cleared");
       }
   };
