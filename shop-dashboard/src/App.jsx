@@ -4,6 +4,7 @@ import {
   BarChart3, 
   DollarSign, 
   TrendingUp, 
+  TrendingDown,
   Video, 
   ShoppingBag, 
   Search, 
@@ -49,7 +50,9 @@ import {
   LogIn,
   ArrowRight,
   Lock,
-  Key
+  Key,
+  Activity,
+  Zap
 } from 'lucide-react';
 
 // --- Global Helper Functions ---
@@ -58,6 +61,12 @@ const parseCurrency = (val) => {
   if (!val) return 0;
   if (typeof val === 'number') return val;
   return parseFloat(val.toString().replace(/[^0-9.-]+/g, '')) || 0;
+};
+
+const parsePercent = (val) => {
+    if (!val) return 0;
+    if (typeof val === 'number') return val;
+    return parseFloat(val.toString().replace('%', '')) || 0;
 };
 
 const formatCurrency = (amount, currencySymbol = '฿') => {
@@ -71,6 +80,12 @@ const getBadgeColor = (category) => {
       case 'B': return 'bg-slate-100 text-slate-600 border-slate-200';
       default: return 'bg-gray-50 text-gray-500 border-gray-200';
   }
+};
+
+const getHealthColor = (score) => {
+    if (score >= 80) return 'text-emerald-600 bg-emerald-50 border-emerald-200';
+    if (score >= 50) return 'text-amber-600 bg-amber-50 border-amber-200';
+    return 'text-rose-600 bg-rose-50 border-rose-200';
 };
 
 // --- Sub-Components ---
@@ -117,9 +132,14 @@ const StatCard = ({ title, value, icon: Icon, colorClass, subText, info }) => (
   </div>
 );
 
-const ProductDetailModal = ({ product, onClose, currency }) => {
+const ProductDetailModal = ({ product, onClose, currency, benchmarks }) => {
   if (!product) return null;
   const maxGmv = Math.max(product.shopGmv, product.videoGmv, product.liveGmv) || 1;
+  const healthScore = product.healthScore || 0;
+
+  // Comparison Logic
+  const cvrDiff = product.cvrNum - benchmarks.avgCvr;
+  const ctrDiff = product.ctrNum - benchmarks.avgCtr;
 
   return (
       <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" onClick={onClose}>
@@ -133,14 +153,15 @@ const ProductDetailModal = ({ product, onClose, currency }) => {
                            <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold ${product.status === 'Active' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'}`}>
                               {product.status}
                           </span>
-                          <span className="text-xs text-slate-400 font-mono flex items-center gap-1">
-                              <Database className="w-3 h-3" /> {product.id}
+                          <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold border ${getHealthColor(healthScore)}`}>
+                              Health: {healthScore}/100
                           </span>
                       </div>
                       <h2 className="text-xl font-bold text-slate-800 leading-tight mb-2">{product.name}</h2>
                       <div className="flex flex-wrap gap-3 text-xs text-slate-500">
                          <span className="flex items-center gap-1 bg-white px-2 py-1 rounded border border-slate-200 shadow-sm"><Smartphone className="w-3 h-3 text-violet-600" /> Platform: <strong>{product.platform}</strong></span>
-                         <span className="flex items-center gap-1 bg-white px-2 py-1 rounded border border-slate-200 shadow-sm"><FileText className="w-3 h-3 text-indigo-600" /> Source: {product.sourceFile}</span>
+                         <span className="flex items-center gap-1 bg-white px-2 py-1 rounded border border-slate-200 shadow-sm"><FileText className="w-3 h-3 text-indigo-600" /> ID: {product.id}</span>
+                         <span className="flex items-center gap-1 bg-white px-2 py-1 rounded border border-slate-200 shadow-sm font-semibold text-violet-700"><Zap className="w-3 h-3" /> Segment: {product.segment}</span>
                       </div>
                   </div>
                   <button onClick={onClose} className="p-2 hover:bg-slate-200 rounded-lg transition-colors">
@@ -149,22 +170,63 @@ const ProductDetailModal = ({ product, onClose, currency }) => {
               </div>
               
               <div className="p-6 overflow-y-auto">
+                  
+                  {/* Benchmarking Section */}
+                  <div className="mb-8 p-4 bg-slate-50 rounded-xl border border-slate-200">
+                      <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wide mb-4 flex items-center gap-2">
+                          <Activity className="w-4 h-4 text-violet-600" /> Market Benchmark Analysis
+                      </h3>
+                      <div className="space-y-4">
+                          <div>
+                              <div className="flex justify-between text-xs mb-1">
+                                  <span className="text-slate-500">Conversion Rate (CVR)</span>
+                                  <span className={cvrDiff >= 0 ? 'text-emerald-600 font-bold' : 'text-rose-600 font-bold'}>
+                                      {product.cvr} vs Avg {benchmarks.avgCvr.toFixed(2)}% ({cvrDiff > 0 ? '+' : ''}{cvrDiff.toFixed(2)}%)
+                                  </span>
+                              </div>
+                              <div className="h-2 bg-slate-200 rounded-full overflow-hidden relative">
+                                  {/* Average Marker */}
+                                  <div className="absolute top-0 bottom-0 w-0.5 bg-slate-400 z-10" style={{left: `${Math.min(benchmarks.avgCvr * 5, 100)}%`}}></div>
+                                  <div className={`h-full rounded-full ${cvrDiff >= 0 ? 'bg-emerald-500' : 'bg-rose-500'}`} style={{width: `${Math.min(product.cvrNum * 5, 100)}%`}}></div>
+                              </div>
+                          </div>
+                          <div>
+                              <div className="flex justify-between text-xs mb-1">
+                                  <span className="text-slate-500">Click-Through Rate (CTR)</span>
+                                  <span className={ctrDiff >= 0 ? 'text-emerald-600 font-bold' : 'text-rose-600 font-bold'}>
+                                      {product.ctr} vs Avg {benchmarks.avgCtr.toFixed(2)}% ({ctrDiff > 0 ? '+' : ''}{ctrDiff.toFixed(2)}%)
+                                  </span>
+                              </div>
+                              <div className="h-2 bg-slate-200 rounded-full overflow-hidden relative">
+                                  <div className="absolute top-0 bottom-0 w-0.5 bg-slate-400 z-10" style={{left: `${Math.min(benchmarks.avgCtr * 10, 100)}%`}}></div>
+                                  <div className={`h-full rounded-full ${ctrDiff >= 0 ? 'bg-emerald-500' : 'bg-rose-500'}`} style={{width: `${Math.min(product.ctrNum * 10, 100)}%`}}></div>
+                              </div>
+                          </div>
+                      </div>
+                      {product.potentialRevenue > 0 && (
+                          <div className="mt-4 p-3 bg-violet-100 rounded-lg text-xs text-violet-800 flex items-center gap-2 border border-violet-200">
+                              <Lightbulb className="w-4 h-4" />
+                              <span><strong>Opportunity:</strong> Improving CVR to market average could generate an extra <strong>{formatCurrency(product.potentialRevenue, currency)}</strong>.</span>
+                          </div>
+                      )}
+                  </div>
+
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                      <div className="p-4 bg-violet-50 rounded-xl border border-violet-100 text-center">
-                          <p className="text-xs text-violet-600 font-bold uppercase mb-1">Total Sales</p>
-                          <p className="text-xl md:text-2xl font-bold text-violet-800">{formatCurrency(product.gmv, currency)}</p>
+                      <div className="p-4 bg-white rounded-xl border border-slate-200 text-center shadow-sm">
+                          <p className="text-xs text-slate-500 font-bold uppercase mb-1">Total Sales</p>
+                          <p className="text-xl md:text-2xl font-bold text-violet-700">{formatCurrency(product.gmv, currency)}</p>
                       </div>
-                      <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 text-center">
-                          <p className="text-xs text-slate-600 font-bold uppercase mb-1">Items Sold</p>
-                          <p className="text-xl md:text-2xl font-bold text-slate-800">{product.itemsSold}</p>
+                      <div className="p-4 bg-white rounded-xl border border-slate-200 text-center shadow-sm">
+                          <p className="text-xs text-slate-500 font-bold uppercase mb-1">Items Sold</p>
+                          <p className="text-xl md:text-2xl font-bold text-slate-700">{product.itemsSold}</p>
                       </div>
-                      <div className="p-4 bg-rose-50 rounded-xl border border-rose-100 text-center">
-                          <p className="text-xs text-rose-600 font-bold uppercase mb-1">Conversion</p>
-                          <p className="text-xl md:text-2xl font-bold text-rose-800">{product.cvr}</p>
+                      <div className="p-4 bg-white rounded-xl border border-slate-200 text-center shadow-sm">
+                          <p className="text-xs text-slate-500 font-bold uppercase mb-1">Conversion</p>
+                          <p className="text-xl md:text-2xl font-bold text-emerald-600">{product.cvr}</p>
                       </div>
-                      <div className="p-4 bg-amber-50 rounded-xl border border-amber-100 text-center">
-                          <p className="text-xs text-amber-600 font-bold uppercase mb-1">Orders</p>
-                          <p className="text-xl md:text-2xl font-bold text-amber-800">{product.orders}</p>
+                      <div className="p-4 bg-white rounded-xl border border-slate-200 text-center shadow-sm">
+                          <p className="text-xs text-slate-500 font-bold uppercase mb-1">Orders</p>
+                          <p className="text-xl md:text-2xl font-bold text-amber-600">{product.orders}</p>
                       </div>
                   </div>
 
@@ -175,9 +237,9 @@ const ProductDetailModal = ({ product, onClose, currency }) => {
                           </h3>
                           <div className="space-y-4">
                               {[
-                              { name: 'Shop Tab', gmv: product.shopGmv, views: product.shopViews, icon: ShoppingBag, color: 'violet' },
-                              { name: 'Video Content', gmv: product.videoGmv, views: product.videoViews, icon: Video, color: 'indigo' },
-                              { name: 'Live Stream', gmv: product.liveGmv, views: product.liveViews, icon: Eye, color: 'rose' },
+                              { name: 'Shop Tab', gmv: product.shopGmv, icon: ShoppingBag, color: 'violet' },
+                              { name: 'Video Content', gmv: product.videoGmv, icon: Video, color: 'indigo' },
+                              { name: 'Live Stream', gmv: product.liveGmv, icon: Eye, color: 'rose' },
                               ].map((channel, i) => (
                               <div key={i} className="bg-slate-50 rounded-lg p-3 border border-slate-200">
                                   <div className="flex justify-between text-sm mb-2">
@@ -320,23 +382,33 @@ const MediaView = ({ products, currency }) => {
     );
 };
 
-const FinanceView = ({ products, currency }) => {
+const FinanceView = ({ products, currency, campaigns = [] }) => {
     const [cogsPercent, setCogsPercent] = useState(40);
-    const [adSpend, setAdSpend] = useState(0);
+    const [manualAdSpend, setManualAdSpend] = useState(0);
     const [fixedCost, setFixedCost] = useState(0);
 
+    // Advanced Accounting Logic
     const totalRevenue = products.reduce((sum, p) => sum + p.gmv, 0);
     const estimatedCOGS = totalRevenue * (cogsPercent / 100);
+    
+    // Calculate total campaign spend from planner
+    const campaignSpend = campaigns.reduce((sum, c) => sum + (c.adSpend || 0), 0);
+    const totalAdSpend = manualAdSpend + campaignSpend;
+    
     const grossProfit = totalRevenue - estimatedCOGS;
-    const netProfit = grossProfit - adSpend - fixedCost;
-    const margin = (netProfit / (totalRevenue || 1)) * 100;
+    const variableCosts = totalRevenue * 0.05; // Assumed 5% platform fees/shipping variance
+    const contributionMargin = grossProfit - variableCosts - totalAdSpend;
+    const netProfit = contributionMargin - fixedCost;
+    
+    const marginPercent = (netProfit / (totalRevenue || 1)) * 100;
+    const contributionMarginPercent = (contributionMargin / (totalRevenue || 1)) * 100;
 
     return (
         <div className="h-full flex flex-col animate-in fade-in slide-in-from-bottom-4">
              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-slate-800 tracking-tight">Profitability Calculator</h2>
+                <h2 className="text-2xl font-bold text-slate-800 tracking-tight">Advanced Profitability Engine</h2>
                 <div className="bg-violet-50 text-violet-700 px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2">
-                    <Calculator className="w-4 h-4" /> Estimated
+                    <Calculator className="w-4 h-4" /> Real-time Estimates
                 </div>
              </div>
 
@@ -362,13 +434,16 @@ const FinanceView = ({ products, currency }) => {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-slate-600 mb-2">Monthly Ad Spend ({currency})</label>
+                            <label className="block text-sm font-medium text-slate-600 mb-2">Additional Ad Spend ({currency})</label>
                             <input 
                                 type="number" 
-                                value={adSpend}
-                                onChange={(e) => setAdSpend(Number(e.target.value))}
+                                value={manualAdSpend}
+                                onChange={(e) => setManualAdSpend(Number(e.target.value))}
                                 className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-violet-500 focus:outline-none"
                             />
+                            <p className="text-xs text-slate-400 mt-1">
+                                + {formatCurrency(campaignSpend, currency)} from Campaign Planner
+                            </p>
                         </div>
 
                         <div>
@@ -389,9 +464,14 @@ const FinanceView = ({ products, currency }) => {
                              <div className="relative z-10">
                                 <p className="text-slate-400 text-sm font-medium uppercase tracking-wider mb-1">Estimated Net Profit</p>
                                 <p className="text-4xl font-extrabold tracking-tight">{formatCurrency(netProfit, currency)}</p>
-                                <p className={`text-sm mt-2 font-bold ${margin > 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                                    {margin.toFixed(1)}% Net Margin
-                                </p>
+                                <div className="flex gap-4 mt-2">
+                                    <p className={`text-sm font-bold ${marginPercent > 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                        {marginPercent.toFixed(1)}% Net
+                                    </p>
+                                    <p className="text-sm text-slate-400">
+                                        {contributionMarginPercent.toFixed(1)}% CM
+                                    </p>
+                                </div>
                              </div>
                              <div className="absolute right-0 bottom-0 opacity-10 transform translate-x-1/4 translate-y-1/4">
                                  <DollarSign className="w-48 h-48" />
@@ -399,21 +479,27 @@ const FinanceView = ({ products, currency }) => {
                          </div>
 
                          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-center">
-                            <div className="flex justify-between items-center border-b border-slate-100 pb-3 mb-3">
-                                <span className="text-slate-500 font-medium">Gross Revenue</span>
-                                <span className="font-bold text-slate-800">{formatCurrency(totalRevenue, currency)}</span>
-                            </div>
-                            <div className="flex justify-between items-center border-b border-slate-100 pb-3 mb-3">
-                                <span className="text-rose-500 font-medium">- COGS (Est.)</span>
-                                <span className="font-bold text-rose-600">{formatCurrency(estimatedCOGS, currency)}</span>
-                            </div>
-                            <div className="flex justify-between items-center border-b border-slate-100 pb-3 mb-3">
-                                <span className="text-orange-500 font-medium">- Ads & Operations</span>
-                                <span className="font-bold text-orange-600">{formatCurrency(adSpend + fixedCost, currency)}</span>
-                            </div>
-                            <div className="flex justify-between items-center pt-2">
-                                <span className="text-violet-600 font-bold">Net Profit</span>
-                                <span className="font-bold text-violet-700 text-lg">{formatCurrency(netProfit, currency)}</span>
+                            <div className="space-y-3 text-sm">
+                                <div className="flex justify-between items-center border-b border-slate-100 pb-2">
+                                    <span className="text-slate-500 font-medium">Gross Revenue</span>
+                                    <span className="font-bold text-slate-800">{formatCurrency(totalRevenue, currency)}</span>
+                                </div>
+                                <div className="flex justify-between items-center border-b border-slate-100 pb-2">
+                                    <span className="text-rose-500 font-medium">- COGS (Est.)</span>
+                                    <span className="font-bold text-rose-600">{formatCurrency(estimatedCOGS, currency)}</span>
+                                </div>
+                                <div className="flex justify-between items-center border-b border-slate-100 pb-2">
+                                    <span className="text-orange-500 font-medium">- Total Ad Spend</span>
+                                    <span className="font-bold text-orange-600">{formatCurrency(totalAdSpend, currency)}</span>
+                                </div>
+                                <div className="flex justify-between items-center border-b border-slate-100 pb-2">
+                                    <span className="text-slate-500 font-medium">- Var. Costs (5%)</span>
+                                    <span className="font-bold text-slate-600">{formatCurrency(variableCosts, currency)}</span>
+                                </div>
+                                <div className="flex justify-between items-center pt-2">
+                                    <span className="text-violet-600 font-bold">Contribution Margin</span>
+                                    <span className="font-bold text-violet-700">{formatCurrency(contributionMargin, currency)}</span>
+                                </div>
                             </div>
                          </div>
                      </div>
@@ -425,12 +511,23 @@ const FinanceView = ({ products, currency }) => {
 
 const CampaignView = ({ products, currency, campaigns, setCampaigns }) => {
     const [showModal, setShowModal] = useState(false);
+    const [showAnalyticsModal, setShowAnalyticsModal] = useState(false);
+    const [activeCampaign, setActiveCampaign] = useState(null);
     
-    // Modal State
+    // Create Modal State
     const [newCampName, setNewCampName] = useState('');
     const [discountPercent, setDiscountPercent] = useState(0);
     const [adUrl, setAdUrl] = useState('');
     const [selectedIds, setSelectedIds] = useState([]);
+
+    // Analytics Modal State
+    const [analyticsData, setAnalyticsData] = useState({
+        adSpend: 0,
+        startDate: '',
+        endDate: '',
+        platform: 'Meta Ads',
+        targetRoas: 3.0
+    });
 
     const handleCreate = () => {
         if (!newCampName) return;
@@ -450,7 +547,9 @@ const CampaignView = ({ products, currency, campaigns, setCampaigns }) => {
             discountPercent,
             adUrl,
             status: 'Planned',
-            date: new Date().toLocaleDateString()
+            date: new Date().toLocaleDateString(),
+            adSpend: 0,
+            adDetails: null
         };
         setCampaigns([...campaigns, newCamp]);
         setShowModal(false);
@@ -464,6 +563,32 @@ const CampaignView = ({ products, currency, campaigns, setCampaigns }) => {
         if(window.confirm('Delete this campaign plan?')) {
             setCampaigns(prev => prev.filter(c => c.id !== id));
         }
+    };
+
+    const openAnalytics = (campaign) => {
+        setActiveCampaign(campaign);
+        setAnalyticsData({
+            adSpend: campaign.adSpend || 0,
+            startDate: campaign.adDetails?.startDate || '',
+            endDate: campaign.adDetails?.endDate || '',
+            platform: campaign.adDetails?.platform || 'Meta Ads',
+            targetRoas: campaign.adDetails?.targetRoas || 3.0
+        });
+        setShowAnalyticsModal(true);
+    };
+
+    const saveAnalytics = () => {
+        setCampaigns(prev => prev.map(c => {
+            if(c.id === activeCampaign.id) {
+                return {
+                    ...c,
+                    adSpend: Number(analyticsData.adSpend),
+                    adDetails: { ...analyticsData }
+                };
+            }
+            return c;
+        }));
+        setShowAnalyticsModal(false);
     };
 
     const toggleSelection = (id) => {
@@ -517,8 +642,8 @@ const CampaignView = ({ products, currency, campaigns, setCampaigns }) => {
                                      <span className="font-bold text-slate-800">{camp.productCount} items / -{camp.discountPercent}%</span>
                                  </div>
                                  <div className="flex justify-between text-sm">
-                                     <span className="text-slate-500">Baseline Revenue</span>
-                                     <span className="font-bold text-slate-600">{formatCurrency(camp.baselineGmv, currency)}</span>
+                                     <span className="text-slate-500">Ad Spend</span>
+                                     <span className="font-bold text-slate-800">{formatCurrency(camp.adSpend, currency)}</span>
                                  </div>
                                  <div className="flex justify-between text-sm bg-violet-50 p-2 rounded-lg border border-violet-100">
                                      <span className="text-violet-600 font-bold">Proj. Revenue</span>
@@ -526,14 +651,19 @@ const CampaignView = ({ products, currency, campaigns, setCampaigns }) => {
                                  </div>
                              </div>
                              <div className="pt-2 border-t border-slate-100 flex gap-2">
-                                <button className="flex-1 py-2 text-xs font-bold text-violet-600 bg-violet-50 rounded-lg hover:bg-violet-100">Analytics</button>
+                                <button 
+                                    onClick={() => openAnalytics(camp)}
+                                    className="flex-1 py-2 text-xs font-bold text-violet-600 bg-violet-50 rounded-lg hover:bg-violet-100 flex items-center justify-center gap-2"
+                                >
+                                    <BarChart3 className="w-3 h-3" /> Analytics & Ads
+                                </button>
                              </div>
                          </div>
                      ))
                  )}
              </div>
 
-             {/* Modal Overlay */}
+             {/* Create Modal */}
              {showModal && (
                  <div className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
                      <div className="bg-white rounded-xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col max-h-[85vh]">
@@ -616,6 +746,82 @@ const CampaignView = ({ products, currency, campaigns, setCampaigns }) => {
                      </div>
                  </div>
              )}
+
+            {/* Analytics Modal */}
+            {showAnalyticsModal && (
+                <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4 backdrop-blur-md">
+                     <div className="bg-white rounded-xl w-full max-w-md overflow-hidden shadow-2xl flex flex-col">
+                        <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                             <div className="flex items-center gap-2">
+                                <BarChart3 className="w-5 h-5 text-violet-600" />
+                                <h3 className="font-bold text-slate-800">Campaign Ad Analytics</h3>
+                             </div>
+                             <button onClick={() => setShowAnalyticsModal(false)}><X className="w-5 h-5 text-slate-500" /></button>
+                         </div>
+                         <div className="p-6 space-y-4">
+                            <div>
+                                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Ad Platform</label>
+                                <select 
+                                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"
+                                    value={analyticsData.platform}
+                                    onChange={e => setAnalyticsData({...analyticsData, platform: e.target.value})}
+                                >
+                                    <option value="Meta Ads">Meta Ads (Facebook/Instagram)</option>
+                                    <option value="TikTok Ads">TikTok Ads</option>
+                                    <option value="Google Ads">Google Ads</option>
+                                    <option value="Shopee Ads">Shopee Ads</option>
+                                    <option value="Lazada Ads">Lazada Solutions</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Total Ad Spend ({currency})</label>
+                                <input 
+                                    type="number" 
+                                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm font-mono font-medium"
+                                    value={analyticsData.adSpend}
+                                    onChange={e => setAnalyticsData({...analyticsData, adSpend: e.target.value})}
+                                    placeholder="0.00"
+                                />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Start Date</label>
+                                    <input 
+                                        type="date" 
+                                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"
+                                        value={analyticsData.startDate}
+                                        onChange={e => setAnalyticsData({...analyticsData, startDate: e.target.value})}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">End Date</label>
+                                    <input 
+                                        type="date" 
+                                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"
+                                        value={analyticsData.endDate}
+                                        onChange={e => setAnalyticsData({...analyticsData, endDate: e.target.value})}
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Target ROAS (Return on Ad Spend)</label>
+                                <input 
+                                    type="number" 
+                                    step="0.1"
+                                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"
+                                    value={analyticsData.targetRoas}
+                                    onChange={e => setAnalyticsData({...analyticsData, targetRoas: e.target.value})}
+                                />
+                                <p className="text-[10px] text-slate-400 mt-1">Quantro uses this for profitability forecasting.</p>
+                            </div>
+                         </div>
+                         <div className="p-4 border-t border-slate-100 bg-slate-50 flex justify-end gap-2">
+                             <button onClick={() => setShowAnalyticsModal(false)} className="px-4 py-2 text-sm text-slate-600 font-medium">Cancel</button>
+                             <button onClick={saveAnalytics} className="px-4 py-2 bg-violet-600 text-white rounded-lg text-sm font-bold shadow-md hover:bg-violet-700">Save Data</button>
+                         </div>
+                     </div>
+                </div>
+            )}
         </div>
     );
 };
@@ -631,21 +837,41 @@ const CalendarView = ({ uploadedFiles, campaigns }) => {
     
     const getEventsForDay = (day) => {
         const dateObj = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
-        // const dateStr = dateObj.toLocaleDateString();
+        // Normalize time to compare dates only
+        dateObj.setHours(0,0,0,0);
+        
         const events = [];
         
-        // Campaign Events
+        // Campaign Events (Creation Date)
         campaigns.forEach(c => {
-             // Normalized date comparison
-             if(new Date(c.date).toDateString() === dateObj.toDateString()) {
-                 events.push({ type: 'campaign', title: c.name });
+             const cDate = new Date(c.date);
+             cDate.setHours(0,0,0,0);
+             if(cDate.getTime() === dateObj.getTime()) {
+                 events.push({ type: 'campaign-create', title: `${c.name} (Created)` });
+             }
+             
+             // Campaign Duration (Active Running)
+             if (c.adDetails?.startDate && c.adDetails?.endDate) {
+                 const start = new Date(c.adDetails.startDate);
+                 const end = new Date(c.adDetails.endDate);
+                 start.setHours(0,0,0,0);
+                 end.setHours(0,0,0,0);
+                 
+                 if (dateObj >= start && dateObj <= end) {
+                      // Check if it's the start or end day specifically for better UI text
+                      if (dateObj.getTime() === start.getTime()) events.push({ type: 'campaign-start', title: `START: ${c.name}` });
+                      else if (dateObj.getTime() === end.getTime()) events.push({ type: 'campaign-end', title: `END: ${c.name}` });
+                      else events.push({ type: 'campaign-run', title: `${c.name} (Active)` });
+                 }
              }
         });
         
         // Import History Events
         uploadedFiles.forEach(f => {
             if(typeof f === 'object' && f.date) {
-                 if(new Date(f.date).toDateString() === dateObj.toDateString()) {
+                 const fDate = new Date(f.date);
+                 fDate.setHours(0,0,0,0);
+                 if(fDate.getTime() === dateObj.getTime()) {
                      events.push({ type: 'import', title: `Import: ${f.name}` });
                  }
             }
@@ -690,23 +916,32 @@ const CalendarView = ({ uploadedFiles, campaigns }) => {
                      const todayDate = new Date();
                      const isToday = day === todayDate.getDate() && currentMonth.getMonth() === todayDate.getMonth() && currentMonth.getFullYear() === todayDate.getFullYear();
                      
+                     // Helper to get event color
+                     const getEventStyle = (type) => {
+                         if (type.includes('campaign-start')) return 'bg-emerald-100 text-emerald-700 border-emerald-200';
+                         if (type.includes('campaign-end')) return 'bg-rose-100 text-rose-700 border-rose-200';
+                         if (type.includes('campaign-run')) return 'bg-violet-50 text-violet-600 border-violet-100 opacity-70';
+                         if (type === 'import') return 'bg-slate-100 text-slate-600 border-slate-200';
+                         return 'bg-indigo-100 text-indigo-700';
+                     }
+
                      return (
                          <div 
                             key={day} 
                             onClick={() => events.length > 0 && setSelectedDate({ day, events })}
-                            className={`min-h-[100px] p-2 rounded-xl border ${isToday ? 'bg-violet-50 border-violet-200' : 'bg-white border-slate-100'} flex flex-col gap-1 overflow-hidden hover:shadow-md transition-shadow relative cursor-pointer group`}
+                            className={`min-h-[100px] p-2 rounded-xl border ${isToday ? 'bg-violet-50 border-violet-200 ring-2 ring-violet-200 ring-offset-2' : 'bg-white border-slate-100'} flex flex-col gap-1 overflow-hidden hover:shadow-md transition-all relative cursor-pointer group`}
                          >
                              <span className={`text-sm font-bold ${isToday ? 'text-violet-700' : 'text-slate-700'}`}>{day}</span>
                              {events.map((ev, i) => (
-                                 <div key={i} className={`text-[10px] px-1.5 py-0.5 rounded truncate font-medium ${ev.type === 'campaign' ? 'bg-indigo-100 text-indigo-700' : 'bg-green-100 text-green-700'}`}>
+                                 <div key={i} className={`text-[9px] px-1.5 py-0.5 rounded truncate font-medium border ${getEventStyle(ev.type)}`}>
                                      {ev.title}
                                  </div>
                              ))}
                              {/* Traffic Sim for demo */}
                              {(day % 7 === 0 || day === 15) && (
-                                 <div className="mt-auto flex justify-center">
-                                     <div className="text-[9px] bg-rose-50 text-rose-600 px-1 rounded flex items-center gap-1 w-full justify-center">
-                                         <TrendingUp className="w-2 h-2" /> Traffic Spike
+                                 <div className="mt-auto flex justify-center opacity-40 group-hover:opacity-100 transition-opacity">
+                                     <div className="text-[9px] bg-amber-50 text-amber-600 px-1 rounded flex items-center gap-1 w-full justify-center">
+                                         <TrendingUp className="w-2 h-2" /> Traffic
                                      </div>
                                  </div>
                              )}
@@ -727,9 +962,9 @@ const CalendarView = ({ uploadedFiles, campaigns }) => {
                          </div>
                          <div className="space-y-3">
                              {selectedDate.events.map((ev, i) => (
-                                 <div key={i} className={`p-4 rounded-xl border flex items-center gap-3 ${ev.type === 'campaign' ? 'bg-indigo-50 border-indigo-100 text-indigo-800' : 'bg-green-50 border-green-100 text-green-800'}`}>
-                                     {ev.type === 'campaign' ? <Target className="w-5 h-5"/> : <Database className="w-5 h-5"/>}
-                                     <span className="font-medium">{ev.title}</span>
+                                 <div key={i} className={`p-4 rounded-xl border flex items-center gap-3 bg-white shadow-sm`}>
+                                     {ev.type.includes('campaign') ? <Target className="w-5 h-5 text-violet-600"/> : <Database className="w-5 h-5 text-slate-500"/>}
+                                     <span className="font-medium text-slate-700">{ev.title}</span>
                                  </div>
                              ))}
                          </div>
@@ -835,7 +1070,7 @@ const Sidebar = ({ activeView, setActiveView, smartInsights, fileInputRef, handl
   </div>
 );
 
-const DashboardView = ({ topProduct, setSelectedProduct, currency, channelData, totalChannelGmv, summary, timePeriod, setTimePeriod, platformFilter, setPlatformFilter, availablePlatforms, visibleKPIs }) => (
+const DashboardView = ({ topProduct, setSelectedProduct, currency, channelData, totalChannelGmv, summary, timePeriod, setTimePeriod, platformFilter, setPlatformFilter, availablePlatforms, visibleKPIs, opportunityValue }) => (
   <>
     <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4 animate-in fade-in slide-in-from-top-2">
        <div className="flex bg-white p-1 rounded-lg border border-slate-200 shadow-sm">
@@ -992,9 +1227,9 @@ const DashboardView = ({ topProduct, setSelectedProduct, currency, channelData, 
               <tr className="text-slate-400 text-xs font-bold uppercase tracking-wider border-b border-slate-100">
                   <th className="text-left py-3 px-2">Product</th>
                   <th className="text-center py-3 px-2">Class</th>
+                  <th className="text-center py-3 px-2">Health</th>
                   <th className="text-right py-3 px-2">GMV</th>
                   <th className="text-center py-3 px-2">Sold</th>
-                  <th className="text-center py-3 px-2">Status</th>
               </tr>
               </thead>
               <tbody className="text-slate-700 font-medium">
@@ -1014,13 +1249,13 @@ const DashboardView = ({ topProduct, setSelectedProduct, currency, channelData, 
                               {topProduct.abcCategory}
                           </span>
                       </td>
-                      <td className="py-3 px-2 text-right font-mono text-violet-700 font-bold">{formatCurrency(topProduct.gmv, currency)}</td>
-                      <td className="py-3 px-2 text-center text-slate-600">{topProduct.itemsSold}</td>
                       <td className="py-3 px-2 text-center">
-                          <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold ${topProduct.status === 'Active' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-500 border border-slate-200'}`}>
-                              {topProduct.status}
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${getHealthColor(topProduct.healthScore || 0)}`}>
+                              {topProduct.healthScore || 0}
                           </span>
                       </td>
+                      <td className="py-3 px-2 text-right font-mono text-violet-700 font-bold">{formatCurrency(topProduct.gmv, currency)}</td>
+                      <td className="py-3 px-2 text-center text-slate-600">{topProduct.itemsSold}</td>
                   </tr>
               ) : (
                 <tr><td colSpan="5" className="text-center p-4">No Data</td></tr>
@@ -1041,15 +1276,13 @@ const DashboardView = ({ topProduct, setSelectedProduct, currency, channelData, 
             info="Total Gross Merchandise Value across all channels before deductions."
           />
         )}
-        {visibleKPIs?.avgOrderValue && (
-          <StatCard 
-            title="Avg Order Value" 
-            value={formatCurrency(summary.avgOrderValue, currency)} 
-            icon={ShoppingBag}
-            colorClass="bg-pink-50 text-pink-600"
-            info="Average revenue generated per individual order."
-          />
-        )}
+        <StatCard 
+            title="AI Opportunity" 
+            value={formatCurrency(opportunityValue, currency)} 
+            icon={Zap}
+            colorClass="bg-amber-50 text-amber-600"
+            info="Estimated additional revenue if underperforming products met the average conversion rate."
+        />
         {visibleKPIs?.conversionRate && (
           <StatCard 
             title="Conversion Rate" 
@@ -1126,7 +1359,9 @@ const InventoryView = ({ processedProducts, handleExportCSV, statusFilter, setSt
               <th className="text-center py-4 px-2 cursor-pointer hover:text-violet-600" onClick={() => handleSort('abcCategory')}>
                   <div className="flex items-center justify-center gap-1">Class {getSortIcon('abcCategory')}</div>
               </th>
-              <th className="text-center py-4 px-2">Status</th>
+              <th className="text-center py-4 px-2 cursor-pointer hover:text-violet-600" onClick={() => handleSort('healthScore')}>
+                  <div className="flex items-center justify-center gap-1">Health {getSortIcon('healthScore')}</div>
+              </th>
               <th className="text-right py-4 px-2 cursor-pointer hover:text-violet-600" onClick={() => handleSort('gmv')}>
                   <div className="flex items-center justify-end gap-1">GMV {getSortIcon('gmv')}</div>
               </th>
@@ -1135,9 +1370,6 @@ const InventoryView = ({ processedProducts, handleExportCSV, statusFilter, setSt
               </th>
               <th className="text-right py-4 px-2 cursor-pointer hover:text-violet-600" onClick={() => handleSort('shopGmv')}>
                   <div className="flex items-center justify-end gap-1">Shop {getSortIcon('shopGmv')}</div>
-              </th>
-              <th className="text-right py-4 px-2 cursor-pointer hover:text-violet-600" onClick={() => handleSort('videoGmv')}>
-                  <div className="flex items-center justify-end gap-1">Video {getSortIcon('videoGmv')}</div>
               </th>
               <th className="text-center py-4 px-2 cursor-pointer hover:text-violet-600" onClick={() => handleSort('ctr')}>
                   <div className="flex items-center justify-center gap-1">CTR {getSortIcon('ctr')}</div>
@@ -1166,14 +1398,13 @@ const InventoryView = ({ processedProducts, handleExportCSV, statusFilter, setSt
                       </span>
                   </td>
                   <td className="py-3 px-2 text-center">
-                      <span className={`px-2.5 py-1 rounded-full text-[10px] uppercase font-bold tracking-wide ${item.status === 'Active' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-500 border border-slate-200'}`}>
-                          {item.status}
+                      <span className={`px-2.5 py-1 rounded text-[10px] font-bold border ${getHealthColor(item.healthScore)}`}>
+                          {item.healthScore}
                       </span>
                   </td>
                   <td className="py-3 px-2 text-right font-mono text-violet-700 font-bold">{formatCurrency(item.gmv, currency)}</td>
                   <td className="py-3 px-2 text-center">{item.orders}</td>
                   <td className="py-3 px-2 text-right font-mono text-slate-600">{formatCurrency(item.shopGmv, currency)}</td>
-                  <td className="py-3 px-2 text-right font-mono text-slate-600">{formatCurrency(item.videoGmv, currency)}</td>
                   <td className="py-3 px-2 text-center text-slate-500">{item.ctr}</td>
               </tr>
           ))}
@@ -1194,16 +1425,14 @@ const ReportView = ({ settings, summary, smartInsights, channelData, currency, p
 
   // Load html2pdf script dynamically
   useEffect(() => {
+    if (window.html2pdf) {
+        setPdfReady(true);
+        return;
+    }
     const script = document.createElement('script');
     script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
-    script.integrity = "sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==";
-    script.crossOrigin = "anonymous";
-    script.referrerPolicy = "no-referrer";
     script.onload = () => setPdfReady(true);
     document.body.appendChild(script);
-    return () => {
-        if(document.body.contains(script)) document.body.removeChild(script);
-    }
   }, []);
 
   const handleDownloadPDF = () => {
@@ -1218,11 +1447,6 @@ const ReportView = ({ settings, summary, smartInsights, channelData, currency, p
         jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' },
         pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
       };
-
-      // Clone element to remove print-hidden classes for PDF generation if needed, 
-      // but html2pdf handles visible DOM. 
-      // We temporarily show everything if hidden controls interfere, but our controls use .print:hidden which html2pdf respects if we use proper CSS or just hide them before gen.
-      // Actually, html2pdf snapshots the DOM. We can just pass the element.
 
       window.html2pdf().set(opt).from(element).save();
   };
@@ -1767,7 +1991,14 @@ export default function App() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [notifications, setNotifications] = useState([]);
   const [isExcelReady, setIsExcelReady] = useState(false);
-  const [uploadedFiles, setUploadedFiles] = useState([]); 
+  const [uploadedFiles, setUploadedFiles] = useState(() => {
+      try {
+          const savedFiles = localStorage.getItem('shopProFiles');
+          return savedFiles ? JSON.parse(savedFiles) : [];
+      } catch (e) {
+          return [];
+      }
+  }); 
   const [timePeriod, setTimePeriod] = useState('All Time'); 
   const [profileOpen, setProfileOpen] = useState(false); 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -1849,21 +2080,6 @@ export default function App() {
     }
   });
 
-  // Persistent Uploaded Files State
-  const [uploadedFilesState, setUploadedFilesState] = useState(() => { 
-      try {
-          const savedFiles = localStorage.getItem('shopProFiles');
-          return savedFiles ? JSON.parse(savedFiles) : [];
-      } catch (e) {
-          return [];
-      }
-  });
-  
-  // Sync state variable name
-  useEffect(() => {
-     setUploadedFiles(uploadedFilesState); 
-  }, []);
-
   // Persistent Campaigns State
   const [campaigns, setCampaigns] = useState(() => {
       try {
@@ -1908,6 +2124,7 @@ export default function App() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [profileRef]);
 
+  // Load XLSX Script Dynamically
   useEffect(() => {
     if (window.XLSX) {
       setIsExcelReady(true);
@@ -1918,7 +2135,6 @@ export default function App() {
     script.onload = () => setIsExcelReady(true);
     document.body.appendChild(script);
   }, []);
-
 
   // --- Helpers that need state access ---
 
@@ -1967,6 +2183,7 @@ export default function App() {
     if (headers.some(h => h.includes('tiktok') || h.includes('shop tab gmv'))) detectedPlatform = 'TikTok';
     else if (headers.some(h => h.includes('lazada') || h.includes('seller sku'))) detectedPlatform = 'Lazada';
     else if (headers.some(h => h.includes('shopee') || h.includes('variation id'))) detectedPlatform = 'Shopee';
+    else if (headers.some(h => h.includes('amazon') || h.includes('asin'))) detectedPlatform = 'Amazon';
 
     addNotification(`Detected Platform: ${detectedPlatform}`);
 
@@ -1976,21 +2193,21 @@ export default function App() {
     };
 
     return jsonData.map((row, index) => {
-      const id = findVal(row, ['product id', 'item id', 'id', 'sku']) || `gen-${index}`;
-      const name = findVal(row, ['product name', 'item name', 'product']) || 'Unknown Product';
+      const id = findVal(row, ['product id', 'item id', 'id', 'sku', 'asin', 'variation id']) || `gen-${index}`;
+      const name = findVal(row, ['product name', 'item name', 'product', 'title']) || 'Unknown Product';
       const status = findVal(row, ['status', 'product status']) || 'Active';
 
-      const gmv = parseCurrency(findVal(row, ['gmv', 'revenue', 'total sales', 'sales', 'amount']));
-      const sold = parseCurrency(findVal(row, ['items sold', 'units sold', 'sold', 'quantity']));
+      const gmv = parseCurrency(findVal(row, ['gmv', 'revenue', 'total sales', 'sales', 'amount', 'ordered product sales']));
+      const sold = parseCurrency(findVal(row, ['items sold', 'units sold', 'sold', 'quantity', 'units']));
       const orders = parseCurrency(findVal(row, ['orders', 'total orders']));
-      const views = parseCurrency(findVal(row, ['views', 'page view', 'impressions']));
+      const views = parseCurrency(findVal(row, ['views', 'page view', 'impressions', 'sessions', 'visitors']));
       
       const shopGmv = parseCurrency(findVal(row, ['shop tab gmv', 'mall sales']));
       const videoGmv = parseCurrency(findVal(row, ['video gmv', 'content sales']));
       const liveGmv = parseCurrency(findVal(row, ['live gmv', 'livestream sales']));
 
       let ctr = findVal(row, ['click-through', 'ctr']);
-      let cvr = findVal(row, ['conversion rate', 'cvr']);
+      let cvr = findVal(row, ['conversion rate', 'cvr', 'conversion']);
       
       if (typeof cvr === 'number') cvr = (cvr * 100).toFixed(2) + '%';
       if (!cvr) cvr = "0.00%";
@@ -2048,9 +2265,12 @@ export default function App() {
         let headerRowIndex = -1;
         let headers = [];
 
+        // Flexible header search
         for(let i = 0; i < Math.min(25, rawRows.length); i++) {
            const rowStr = rawRows[i].map(cell => String(cell).toLowerCase().trim()).join(' ');
-           if (rowStr.includes('product') && (rowStr.includes('gmv') || rowStr.includes('sales') || rowStr.includes('sku') || rowStr.includes('status'))) {
+           // Expanded keywords for detection
+           if ((rowStr.includes('product') || rowStr.includes('sku') || rowStr.includes('asin') || rowStr.includes('title')) && 
+               (rowStr.includes('gmv') || rowStr.includes('sales') || rowStr.includes('revenue') || rowStr.includes('price'))) {
                headerRowIndex = i;
                headers = rawRows[i].map(h => String(h)); 
                break;
@@ -2058,7 +2278,7 @@ export default function App() {
         }
 
         if (headerRowIndex === -1) {
-             throw new Error("Could not find valid headers (Product, GMV). Please check the file structure.");
+             throw new Error("Could not find valid headers (Product/SKU/ASIN + Sales/GMV). Please check the file structure.");
         }
 
         const dataRows = rawRows.slice(headerRowIndex + 1);
@@ -2073,7 +2293,7 @@ export default function App() {
         if (jsonData.length === 0) throw new Error("No data found after header row.");
 
         const normalized = normalizeData(jsonData, file.name);
-        if (normalized.length === 0) throw new Error("Data normalization failed.");
+        if (normalized.length === 0) throw new Error("Data normalization failed. Ensure columns like 'Product Name' and 'GMV' exist.");
 
         setProducts(prevProducts => {
             const productMap = new Map();
@@ -2105,14 +2325,14 @@ export default function App() {
 
   const handleExportCSV = () => {
     const headers = [
-      'Product ID', 'Name', 'Platform', 'Source File', 'Status', 'Class', 'GMV', 'Orders', 'Sold', 
+      'Product ID', 'Name', 'Platform', 'Source File', 'Status', 'Class', 'Health', 'Segment', 'GMV', 'Orders', 'Sold', 
       'Shop GMV', 'Shop Views', 'Video GMV', 'Video Views', 'Live GMV', 'Live Views', 'CTR', 'CVR'
     ];
 
     const csvContent = [
       headers.join(','),
       ...processedProducts.map(p => [
-        `"${p.id}"`, `"${p.name.replace(/"/g, '""')}"`, p.platform, `"${p.sourceFile || ''}"`, p.status, p.abcCategory,
+        `"${p.id}"`, `"${p.name.replace(/"/g, '""')}"`, p.platform, `"${p.sourceFile || ''}"`, p.status, p.abcCategory, p.healthScore, p.segment,
         p.gmv, p.orders, p.itemsSold,
         p.shopGmv, p.shopViews,
         p.videoGmv, p.videoViews,
@@ -2142,9 +2362,9 @@ export default function App() {
       }
   };
 
-  // --- Derived State ---
+  // --- Derived State & Data Science Logic ---
 
-  const processedProducts = useMemo(() => {
+  const { processedProducts, benchmarks, opportunityValue } = useMemo(() => {
     let data = [...products];
     if (statusFilter !== 'All') data = data.filter(p => p.status === statusFilter);
     if (platformFilter !== 'All') data = data.filter(p => p.platform === platformFilter);
@@ -2153,7 +2373,58 @@ export default function App() {
       const lowerTerm = searchTerm.toLowerCase();
       data = data.filter(p => p.name.toLowerCase().includes(lowerTerm) || p.id.includes(lowerTerm));
     }
+
+    // 1. Calculate Benchmarks (Global Averages)
+    const validItems = data.filter(p => p.gmv > 0);
+    const totalItems = validItems.length || 1;
+    const avgCvr = validItems.reduce((sum, p) => sum + parsePercent(p.cvr), 0) / totalItems;
+    const avgCtr = validItems.reduce((sum, p) => sum + parsePercent(p.ctr), 0) / totalItems;
+    const avgViews = validItems.reduce((sum, p) => sum + (p.shopViews || 0) + (p.videoViews || 0) + (p.liveViews || 0), 0) / totalItems;
     
+    // 2. Enrich Data with Scores & Segments
+    let totalOpportunity = 0;
+
+    data = data.map(p => {
+        const cvrNum = parsePercent(p.cvr);
+        const ctrNum = parsePercent(p.ctr);
+        const totalViews = (p.shopViews || 0) + (p.videoViews || 0) + (p.liveViews || 0);
+        const impliedPrice = p.itemsSold > 0 ? p.gmv / p.itemsSold : 0;
+
+        // Health Score (0-100)
+        // Weighted: GMV (40%), CVR vs Avg (30%), CTR vs Avg (30%)
+        // Normalized GMV score is rudimentary here based on log scale
+        let gmvScore = Math.min((Math.log10(p.gmv + 1) / 5) * 100, 100); 
+        let cvrScore = Math.min((cvrNum / (avgCvr || 1)) * 50, 100);
+        let ctrScore = Math.min((ctrNum / (avgCtr || 1)) * 50, 100);
+        
+        const healthScore = Math.round((gmvScore * 0.4) + (cvrScore * 0.3) + (ctrScore * 0.3));
+
+        // Segment Logic
+        let segment = "Standard";
+        if (healthScore >= 80) segment = "Star Winner";
+        else if (totalViews > avgViews && cvrNum < avgCvr) segment = "Optimize (High View/Low CVR)";
+        else if (totalViews < avgViews && cvrNum > avgCvr) segment = "Hidden Gem";
+        else if (healthScore < 30) segment = "At Risk";
+
+        // Opportunity Calculation (What if CVR was average?)
+        let potentialRevenue = 0;
+        if (cvrNum < avgCvr && totalViews > 100) {
+            const missedSales = ((avgCvr - cvrNum) / 100) * totalViews;
+            potentialRevenue = missedSales * impliedPrice;
+            totalOpportunity += potentialRevenue;
+        }
+
+        return { 
+            ...p, 
+            healthScore, 
+            segment, 
+            cvrNum, 
+            ctrNum,
+            potentialRevenue 
+        };
+    });
+    
+    // Sorting
     data.sort((a, b) => {
       let aValue = a[sortConfig.key];
       let bValue = b[sortConfig.key];
@@ -2170,7 +2441,12 @@ export default function App() {
       if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
       return 0;
     });
-    return data;
+
+    return { 
+        processedProducts: data, 
+        benchmarks: { avgCvr, avgCtr, avgViews },
+        opportunityValue: totalOpportunity
+    };
   }, [products, searchTerm, sortConfig, statusFilter, platformFilter, timePeriod]);
 
   const summary = useMemo(() => {
@@ -2201,9 +2477,11 @@ export default function App() {
   // --- Insights ---
   const smartInsights = useMemo(() => {
     const insights = [];
-    const classA = products.filter(p => p.abcCategory === 'A');
+    const classA = processedProducts.filter(p => p.abcCategory === 'A');
+    
+    // 1. Pareto Analysis
     if (classA.length > 0) {
-        const percentCount = Math.round((classA.length / products.length) * 100);
+        const percentCount = Math.round((classA.length / processedProducts.length) * 100);
         insights.push({
             type: 'strategic',
             title: 'Pareto Strategy',
@@ -2212,20 +2490,31 @@ export default function App() {
             color: 'indigo'
         });
     }
-    const highViewLowCvr = products.find(p => {
-        const views = p.shopViews + (p.videoViews || 0);
-        const cvr = parseFloat(p.cvr);
-        return views > settings.highViewThreshold && cvr < settings.lowCvrThreshold && p.gmv < 1000;
-    });
-    if (highViewLowCvr) {
+
+    // 2. Hidden Gems Identification (Data Science)
+    const hiddenGems = processedProducts.filter(p => p.segment === "Hidden Gem");
+    if (hiddenGems.length > 0) {
         insights.push({
             type: 'opportunity',
-            title: 'Funnel Leak',
-            text: `"${highViewLowCvr.name.substring(0, 15)}..." has >${settings.highViewThreshold} views but <${settings.lowCvrThreshold}% CVR.`,
+            title: 'Hidden Gems Found',
+            text: `${hiddenGems.length} products have high conversion but low traffic. Consider running ads or live streams for these items.`,
+            icon: Zap,
+            color: 'emerald'
+        });
+    }
+
+    // 3. Optimization Targets
+    const leakageItems = processedProducts.filter(p => p.segment === "Optimize (High View/Low CVR)");
+    if (leakageItems.length > 0) {
+        insights.push({
+            type: 'opportunity',
+            title: 'Fix Funnel Leaks',
+            text: `${leakageItems.length} products have high traffic but poor conversion. Check pricing, images, and reviews.`,
             icon: AlertTriangle,
             color: 'rose'
         });
     }
+
     if (insights.length === 0) {
         insights.push({
             type: 'success',
@@ -2236,7 +2525,7 @@ export default function App() {
         });
     }
     return insights;
-  }, [products, settings]);
+  }, [processedProducts, settings]);
 
   const handleSort = (key) => {
     setSortConfig(current => ({
@@ -2342,6 +2631,7 @@ export default function App() {
                     setPlatformFilter={setPlatformFilter} 
                     availablePlatforms={availablePlatforms}
                     visibleKPIs={visibleKPIs}
+                    opportunityValue={opportunityValue}
                 />
               )}
               {activeView === 'inventory' && (
@@ -2373,7 +2663,7 @@ export default function App() {
                       campaigns={campaigns} 
                   />
               )}
-              {activeView === 'finance' && <FinanceView products={processedProducts} currency={settings.currency} />}
+              {activeView === 'finance' && <FinanceView products={processedProducts} currency={settings.currency} campaigns={campaigns} />}
               {activeView === 'reports' && (
                 <ReportView 
                     settings={settings} 
@@ -2411,7 +2701,7 @@ export default function App() {
          ))}
       </div>
 
-      {selectedProduct && <ProductDetailModal product={selectedProduct} onClose={() => setSelectedProduct(null)} currency={settings.currency} />}
+      {selectedProduct && <ProductDetailModal product={selectedProduct} onClose={() => setSelectedProduct(null)} currency={settings.currency} benchmarks={benchmarks} />}
     </div>
   );
 }
