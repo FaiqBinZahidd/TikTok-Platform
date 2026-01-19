@@ -52,7 +52,8 @@ import {
   Lock,
   Key,
   Activity,
-  Zap
+  Zap,
+  Globe
 } from 'lucide-react';
 
 // --- Global Helper Functions ---
@@ -1904,76 +1905,155 @@ const LandingPage = ({ onLogin }) => {
         if (password === 'admin123') {
             onLogin(name || 'Manager');
         } else {
-            alert("Invalid Access Key. Please contact support.");
+            alert("Invalid Access Key. Please use 'admin123' for the demo.");
         }
     };
 
     return (
-        <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl shadow-2xl overflow-hidden max-w-4xl w-full flex flex-col md:flex-row">
-                <div className="p-12 md:w-1/2 flex flex-col justify-center bg-violet-50">
-                    <div className="w-16 h-16 bg-violet-700 rounded-xl flex items-center justify-center text-white text-3xl font-bold mb-6 shadow-lg shadow-violet-700/30">Q</div>
-                    <h1 className="text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">Quantro</h1>
-                    <p className="text-slate-600 text-lg mb-8 leading-relaxed">
-                        The centralized intelligence hub for multi-platform e-commerce brands. Stop guessing, start knowing.
-                    </p>
-                    <div className="space-y-4">
-                        <div className="flex items-center gap-3 text-slate-700">
-                            <CheckCircle2 className="w-5 h-5 text-violet-600" />
-                            <span>Lifetime Data Aggregation</span>
+        <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 font-sans">
+            <div className="bg-white rounded-3xl shadow-2xl overflow-hidden max-w-6xl w-full flex flex-col md:flex-row min-h-[600px]">
+                
+                {/* LEFT PANEL: Value Prop & Visuals */}
+                <div className="p-12 md:w-3/5 flex flex-col justify-center bg-gradient-to-br from-violet-600 to-indigo-900 text-white relative overflow-hidden">
+                    {/* Background Decor */}
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+                    <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
+
+                    <div className="relative z-10">
+                        <div className="flex items-center gap-3 mb-8">
+                            <div className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center text-white text-xl font-bold border border-white/30">Q</div>
+                            <span className="font-bold text-lg tracking-wide opacity-90">QUANTRO INTELLIGENCE</span>
                         </div>
-                        <div className="flex items-center gap-3 text-slate-700">
-                            <CheckCircle2 className="w-5 h-5 text-violet-600" />
-                            <span>Profitability Analysis</span>
+
+                        <h1 className="text-4xl md:text-5xl font-extrabold mb-6 leading-tight">
+                            Stop Losing Profit to <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-cyan-300">Hidden Data.</span>
+                        </h1>
+                        
+                        <p className="text-lg text-violet-100 mb-10 leading-relaxed max-w-lg">
+                            Aggregate TikTok, Lazada, and Shopee sales in one view. See lifetime value, true net profit, and inventory leaks instantly—without the spreadsheet chaos.
+                        </p>
+
+                        {/* Visual Proof / Mock Card */}
+                        <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-6 mb-8 max-w-md transform hover:scale-[1.02] transition-transform duration-500 shadow-2xl">
+                            <div className="flex justify-between items-end mb-4">
+                                <div>
+                                    <p className="text-xs font-bold uppercase tracking-wider text-violet-200 mb-1">Lifetime GMV (All Channels)</p>
+                                    <p className="text-3xl font-bold text-white">฿8,245,000</p>
+                                </div>
+                                <div className="text-right">
+                                    <div className="flex items-center gap-1 text-emerald-300 text-sm font-bold bg-emerald-500/20 px-2 py-1 rounded-lg border border-emerald-500/30">
+                                        <TrendingUp className="w-3 h-3" /> +24%
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <div className="flex justify-between text-[10px] text-violet-200 uppercase font-bold tracking-wide">
+                                    <span>Market Share</span>
+                                </div>
+                                <div className="h-2 w-full bg-black/20 rounded-full overflow-hidden flex">
+                                    <div className="w-[45%] bg-emerald-400"></div>
+                                    <div className="w-[30%] bg-blue-400"></div>
+                                    <div className="w-[25%] bg-rose-400"></div>
+                                </div>
+                                <div className="flex justify-between mt-1 text-[10px] text-violet-200 font-medium">
+                                    <div className="flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>TikTok Shop</div>
+                                    <div className="flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-blue-400"></div>Shopee</div>
+                                    <div className="flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-rose-400"></div>Lazada</div>
+                                </div>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-3 text-slate-700">
-                            <CheckCircle2 className="w-5 h-5 text-violet-600" />
-                            <span>Cross-Channel Attribution</span>
+
+                        <div className="space-y-4 text-violet-100">
+                            <div className="flex items-start gap-3 group">
+                                <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5 group-hover:scale-110 transition-transform" />
+                                <span><strong>Lifetime History:</strong> Break free from the 90-day platform limit.</span>
+                            </div>
+                            <div className="flex items-start gap-3 group">
+                                <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5 group-hover:scale-110 transition-transform" />
+                                <span><strong>True Profit:</strong> Auto-deduct Ads, Fees, and COGS in real-time.</span>
+                            </div>
+                            <div className="flex items-start gap-3 group">
+                                <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5 group-hover:scale-110 transition-transform" />
+                                <span><strong>Funnel Doctor:</strong> Identify "Hidden Gems" and "Funnel Leaks" automatically.</span>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div className="p-12 md:w-1/2 bg-white flex flex-col justify-center">
-                    <h2 className="text-2xl font-bold text-slate-800 mb-6">Welcome Back</h2>
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">Organization Name</label>
-                            <div className="relative">
-                                <User className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
-                                <input 
-                                    type="text" 
-                                    required
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                    placeholder="e.g. Siam Beauty"
-                                    className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none transition-all"
-                                />
+
+                {/* RIGHT PANEL: Demo Access */}
+                <div className="p-12 md:w-2/5 bg-white flex flex-col justify-center relative">
+                    <div className="max-w-sm mx-auto w-full">
+                        <div className="mb-8">
+                            <h2 className="text-3xl font-bold text-slate-900 mb-2 tracking-tight">See Quantro in Action</h2>
+                            <p className="text-slate-500">Instant access to the live demo environment.</p>
+                        </div>
+
+                        <form onSubmit={handleSubmit} className="space-y-5">
+                            <div>
+                                <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Organization Name</label>
+                                <div className="relative group">
+                                    <User className="absolute left-4 top-3.5 w-5 h-5 text-slate-400 group-focus-within:text-violet-600 transition-colors" />
+                                    <input 
+                                        type="text" 
+                                        required
+                                        value={name}
+                                        onChange={(e) => setName(e.target.value)}
+                                        placeholder="Your Company Name"
+                                        className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none transition-all font-medium text-slate-800 placeholder:text-slate-400"
+                                    />
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div className="flex justify-between items-center mb-2">
+                                    <label className="block text-xs font-bold text-slate-500 uppercase">Demo Access Key</label>
+                                    <span className="text-xs text-violet-700 bg-violet-50 px-2 py-0.5 rounded font-mono font-bold border border-violet-100">key: admin123</span>
+                                </div>
+                                <div className="relative group">
+                                    <Key className="absolute left-4 top-3.5 w-5 h-5 text-slate-400 group-focus-within:text-violet-600 transition-colors" />
+                                    <input 
+                                        type="password" 
+                                        required
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        placeholder="Enter Access Key"
+                                        className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none transition-all font-medium text-slate-800 placeholder:text-slate-400"
+                                    />
+                                </div>
+                            </div>
+
+                            <button 
+                                type="submit"
+                                className="w-full bg-violet-600 text-white font-bold py-4 rounded-xl hover:bg-violet-700 hover:shadow-xl hover:shadow-violet-200 transition-all active:scale-[0.98] flex items-center justify-center gap-2 group"
+                            >
+                                Launch Demo Dashboard <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                            </button>
+                            
+                            <p className="text-center text-xs text-slate-400 mt-4">
+                                <span className="flex items-center justify-center gap-1">
+                                    <Lock className="w-3 h-3" /> No credit card required for demo.
+                                </span>
+                            </p>
+                        </form>
+
+                        <div className="mt-8 pt-8 border-t border-slate-100">
+                            <p className="text-xs text-center text-slate-400 font-medium uppercase tracking-wide mb-4">Trusted by Sellers On</p>
+                            <div className="flex justify-center gap-6 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
+                                <div className="flex items-center gap-1.5 group cursor-default">
+                                    <div className="p-1.5 bg-slate-100 rounded-lg group-hover:bg-slate-200 transition-colors"><Smartphone className="w-4 h-4 text-slate-600" /></div>
+                                    <span className="font-bold text-sm text-slate-600">TikTok</span>
+                                </div>
+                                <div className="flex items-center gap-1.5 group cursor-default">
+                                    <div className="p-1.5 bg-slate-100 rounded-lg group-hover:bg-slate-200 transition-colors"><ShoppingBag className="w-4 h-4 text-slate-600" /></div>
+                                    <span className="font-bold text-sm text-slate-600">Shopee</span>
+                                </div>
+                                <div className="flex items-center gap-1.5 group cursor-default">
+                                    <div className="p-1.5 bg-slate-100 rounded-lg group-hover:bg-slate-200 transition-colors"><Globe className="w-4 h-4 text-slate-600" /></div>
+                                    <span className="font-bold text-sm text-slate-600">Lazada</span>
+                                </div>
                             </div>
                         </div>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">Access Key</label>
-                            <div className="relative">
-                                <Lock className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
-                                <input 
-                                    type="password" 
-                                    required
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    placeholder="Enter your license key"
-                                    className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none transition-all"
-                                />
-                            </div>
-                            <p className="text-xs text-slate-400 mt-1">Use 'admin123' for demo access</p>
-                        </div>
-                        <button 
-                            type="submit"
-                            className="w-full bg-violet-600 text-white font-bold py-3 rounded-lg hover:bg-violet-700 transition-transform active:scale-95 flex items-center justify-center gap-2 shadow-lg shadow-violet-200"
-                        >
-                            Access Dashboard <ArrowRight className="w-5 h-5" />
-                        </button>
-                    </form>
-                    <p className="mt-8 text-center text-xs text-slate-400">
-                        Enterprise Grade Security • 256-bit Encryption
-                    </p>
+                    </div>
                 </div>
             </div>
         </div>
