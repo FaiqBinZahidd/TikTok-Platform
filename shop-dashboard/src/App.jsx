@@ -56,6 +56,25 @@ import {
   Globe
 } from 'lucide-react';
 
+// REPLACE your previous recharts import with this:
+import { 
+  BarChart as ReBarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip as RechartsTooltip, 
+  Legend, 
+  ResponsiveContainer, 
+  PieChart as RePieChart, 
+  Pie, 
+  Cell, 
+  ScatterChart, 
+  Scatter, 
+  ZAxis, 
+  ReferenceLine 
+} from 'recharts';
+
 // --- Global Helper Functions ---
 
 const parseCurrency = (val) => {
@@ -976,6 +995,131 @@ const CalendarView = ({ uploadedFiles, campaigns }) => {
     );
 };
 
+// --- NEW VISUALIZATION COMPONENTS ---
+
+const COLORS = ['#8b5cf6', '#6366f1', '#f43f5e', '#10b981']; // Violet, Indigo, Rose, Emerald
+
+const CustomTooltip = ({ active, payload, label, currency }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-white p-3 border border-slate-200 shadow-xl rounded-lg text-xs">
+        <p className="font-bold text-slate-800 mb-1">{label || payload[0].name}</p>
+        {payload.map((entry, index) => (
+          <p key={index} style={{ color: entry.color }}>
+            {entry.name}: {entry.name.includes('GMV') || entry.name.includes('Revenue') ? `${currency}${entry.value.toLocaleString()}` : entry.value.toLocaleString()}
+          </p>
+        ))}
+      </div>
+    );
+  }
+  return null;
+};
+
+const ChannelPieChart = ({ data, currency }) => {
+  const chartData = [
+    { name: 'Shop Tab', value: data.shop },
+    { name: 'Video', value: data.video },
+    { name: 'Live', value: data.live },
+  ].filter(d => d.value > 0);
+
+  return (
+    <div className="h-64 w-full">
+      <ResponsiveContainer width="100%" height="100%">
+        <PieChart>
+          <Pie
+            data={chartData}
+            cx="50%"
+            cy="50%"
+            innerRadius={60}
+            outerRadius={80}
+            paddingAngle={5}
+            dataKey="value"
+          >
+            {chartData.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+            ))}
+          </Pie>
+          <RechartsTooltip content={<CustomTooltip currency={currency} />} />
+          <Legend verticalAlign="bottom" height={36}/>
+        </PieChart>
+      </ResponsiveContainer>
+    </div>
+  );
+};
+
+const OpportunityScatterPlot = ({ products, currency }) => {
+  // Prepare data: Only plot active products with >0 views
+  const data = products
+    .filter(p => p.gmv > 0)
+    .map(p => ({
+      name: p.name,
+      x: (p.shopViews + (p.videoViews||0) + (p.liveViews||0)), // Total Views
+      y: parseFloat(p.cvr), // CVR
+      z: p.gmv, // Bubble Size (Revenue)
+      segment: p.segment
+    }));
+
+  return (
+    <div className="h-80 w-full bg-white rounded-xl p-4 border border-slate-200">
+      <div className="flex justify-between items-center mb-4">
+         <h3 className="font-bold text-slate-700 flex items-center gap-2">
+            <Zap className="w-4 h-4 text-amber-500"/> Opportunity Matrix
+         </h3>
+         <div className="flex gap-2 text-[10px] text-slate-500">
+            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-500"></span> Hidden Gems</span>
+            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-rose-500"></span> Funnel Leaks</span>
+         </div>
+      </div>
+      <ResponsiveContainer width="100%" height="100%">
+        <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+          <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+          <XAxis type="number" dataKey="x" name="Traffic (Views)" unit="" stroke="#94a3b8" fontSize={10} tickFormatter={(val) => val >= 1000 ? `${(val/1000).toFixed(0)}k` : val} />
+          <YAxis type="number" dataKey="y" name="Conversion Rate" unit="%" stroke="#94a3b8" fontSize={10} />
+          <ZAxis type="number" dataKey="z" range={[50, 400]} name="GMV" />
+          <RechartsTooltip cursor={{ strokeDasharray: '3 3' }} content={<CustomTooltip currency={currency} />} />
+          <ReferenceLine x={500} stroke="#cbd5e1" strokeDasharray="3 3" label={{ value: "High Traffic >", position: 'insideTopRight', fontSize: 10, fill: '#94a3b8' }} />
+          <ReferenceLine y={2.0} stroke="#cbd5e1" strokeDasharray="3 3" label={{ value: "High CVR >", position: 'insideTopRight', fontSize: 10, fill: '#94a3b8' }} />
+          <Scatter name="Products" data={data} fill="#8884d8">
+            {data.map((entry, index) => {
+               // Color logic based on quadrants
+               let color = '#94a3b8'; // default slate
+               if (entry.segment === 'Hidden Gem') color = '#10b981'; // Green
+               if (entry.segment.includes('Optimize')) color = '#f43f5e'; // Red
+               if (entry.segment === 'Star Winner') color = '#8b5cf6'; // Violet
+               return <Cell key={`cell-${index}`} fill={color} />;
+            })}
+          </Scatter>
+        </ScatterChart>
+      </ResponsiveContainer>
+    </div>
+  );
+};
+
+const TopProductsBarChart = ({ products, currency }) => {
+  const data = [...products]
+    .sort((a,b) => b.gmv - a.gmv)
+    .slice(0, 5)
+    .map(p => ({
+      name: p.name.length > 15 ? p.name.substring(0,15) + '...' : p.name,
+      gmv: p.gmv,
+      views: (p.shopViews + (p.videoViews||0) + (p.liveViews||0))
+    }));
+
+  return (
+    <div className="h-64 w-full">
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={data} layout="vertical" margin={{ left: 20 }}>
+          <CartesianGrid strokeDasharray="3 3" horizontal={false} opacity={0.3} />
+          <XAxis type="number" hide />
+          <YAxis dataKey="name" type="category" width={100} tick={{fontSize: 10}} />
+          <RechartsTooltip content={<CustomTooltip currency={currency} />} />
+          <Bar dataKey="gmv" name="Revenue" fill="#8b5cf6" radius={[0, 4, 4, 0]} barSize={20} />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  );
+};
+
 const Sidebar = ({ activeView, setActiveView, smartInsights, fileInputRef, handleFileUpload }) => (
   <div className="w-full md:w-64 bg-slate-50/50 p-6 space-y-2 border-b md:border-b-0 md:border-r border-slate-200 flex-shrink-0 flex flex-col">
     <div className="mb-8 flex items-center justify-between md:block">
@@ -1852,44 +1996,83 @@ const SettingsView = ({ settings, setSettings, uploadedFiles, clearData, addNoti
 
 const AboutView = () => (
     <div className="bg-white rounded-xl p-8 shadow-sm border border-slate-200 h-full overflow-y-auto animate-in fade-in slide-in-from-bottom-4">
-        <div className="max-w-3xl mx-auto">
-            <h1 className="text-3xl font-bold text-slate-800 mb-6 flex items-center gap-3">
-                <div className="w-10 h-10 bg-violet-600 rounded-lg flex items-center justify-center text-white text-xl">Q</div>
-                Quantro
-            </h1>
-            
-            <div className="prose prose-violet max-w-none">
-                <p className="text-lg text-slate-600 mb-8">
-                    Quantro is an enterprise-grade analytics dashboard designed to solve the fragmentation of e-commerce data. We replace messy spreadsheets with a centralized intelligence hub.
+        <div className="max-w-4xl mx-auto space-y-12">
+            {/* Header */}
+            <div className="text-center space-y-4">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-violet-100 text-violet-600 rounded-2xl mb-4">
+                    <span className="text-3xl font-bold">Q</span>
+                </div>
+                <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">Master Your E-commerce Data</h1>
+                <p className="text-lg text-slate-500 max-w-2xl mx-auto">
+                    Quantro is the centralized intelligence hub designed for modern multi-platform sellers. We turn fragmented data from TikTok, Shopee, and Lazada into actionable profit strategies.
                 </p>
+            </div>
 
-                <h3 className="text-xl font-bold text-slate-800 mt-8 mb-4 flex items-center gap-2">
-                    <BookOpen className="w-5 h-5 text-violet-600" /> User Manual & Glossary
-                </h3>
-                
-                <div className="space-y-4">
-                    <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 shadow-sm">
-                        <h4 className="font-bold text-slate-800 mb-2">Key Metrics</h4>
-                        <ul className="space-y-2 text-sm text-slate-600">
-                            <li><strong>GMV (Gross Merchandise Value):</strong> Total sales revenue before any deductions.</li>
-                            <li><strong>CTR (Click-Through Rate):</strong> Percentage of people who saw your product and clicked on it.</li>
-                            <li><strong>CVR (Conversion Rate):</strong> Percentage of visitors who actually bought the product.</li>
-                        </ul>
+            {/* Core Features Grid */}
+            <div className="grid md:grid-cols-3 gap-8">
+                <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100">
+                    <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center mb-4"><Activity className="w-5 h-5"/></div>
+                    <h3 className="font-bold text-slate-900 mb-2">Real-Time Profit</h3>
+                    <p className="text-sm text-slate-600 leading-relaxed">Stop guessing your net margin. Quantro auto-calculates profit by deducting estimated COGS, ad spend, and platform fees instantly.</p>
+                </div>
+                <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100">
+                    <div className="w-10 h-10 bg-violet-100 text-violet-600 rounded-lg flex items-center justify-center mb-4"><Zap className="w-5 h-5"/></div>
+                    <h3 className="font-bold text-slate-900 mb-2">AI Opportunity Detection</h3>
+                    <p className="text-sm text-slate-600 leading-relaxed">Our algorithms automatically flag "Hidden Gems" (high conversion, low traffic) and "Funnel Leaks" so you know exactly where to focus.</p>
+                </div>
+                <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100">
+                    <div className="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center mb-4"><BarChart3 className="w-5 h-5"/></div>
+                    <h3 className="font-bold text-slate-900 mb-2">Lifetime Analytics</h3>
+                    <p className="text-sm text-slate-600 leading-relaxed">Break free from the 90-day historical limit of most platforms. Import and store your data to see long-term trends and seasonality.</p>
+                </div>
+            </div>
+
+            {/* Glossary Section */}
+            <div className="border-t border-slate-200 pt-12">
+                <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+                    <BookOpen className="w-6 h-6 text-slate-400" /> Intelligence Glossary
+                </h2>
+                <div className="grid md:grid-cols-2 gap-6">
+                    <div className="bg-white border border-slate-200 rounded-xl p-5 hover:border-violet-200 transition-colors">
+                        <h4 className="font-bold text-slate-800 mb-1">ABC Analysis (Pareto Principle)</h4>
+                        <p className="text-sm text-slate-600 mb-3">Categorizes inventory based on revenue contribution.</p>
+                        <div className="flex gap-2 flex-wrap">
+                            <span className="px-2 py-1 bg-violet-100 text-violet-700 rounded text-xs font-bold">Class A: Top 80% Revenue</span>
+                            <span className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs font-bold">Class B: Next 15%</span>
+                            <span className="px-2 py-1 bg-gray-100 text-gray-500 rounded text-xs font-bold">Class C: Bottom 5%</span>
+                        </div>
+                    </div>
+                    
+                    <div className="bg-white border border-slate-200 rounded-xl p-5 hover:border-rose-200 transition-colors">
+                        <h4 className="font-bold text-slate-800 mb-1 flex items-center gap-2"><TrendingDown className="w-4 h-4 text-rose-500"/> Funnel Leak</h4>
+                        <p className="text-sm text-slate-600">
+                            Products with <strong>High Traffic</strong> (&gt;500 views) but <strong>Low Conversion</strong> (&lt;0.5%).
+                            <br/><span className="text-xs text-rose-600 mt-1 block">Action: Check price competitiveness, image quality, or reviews.</span>
+                        </p>
                     </div>
 
-                    <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 shadow-sm">
-                        <h4 className="font-bold text-slate-800 mb-2">Smart Analysis</h4>
-                        <ul className="space-y-2 text-sm text-slate-600">
-                            <li><strong>ABC Analysis:</strong> 
-                                <span className="ml-1 px-1.5 py-0.5 bg-violet-100 text-violet-700 rounded text-xs font-bold">Class A</span> (Top 80% Revenue), 
-                                <span className="ml-1 px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded text-xs font-bold">Class B</span> (Next 15%), 
-                                <span className="ml-1 px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-xs font-bold">Class C</span> (Bottom 5%).
-                            </li>
-                            <li><strong>Funnel Leak:</strong> High views but low sales. Usually means price or description issues.</li>
-                            <li><strong>Hidden Gem:</strong> Low views but high conversion. Needs more traffic (Ads/Live).</li>
+                    <div className="bg-white border border-slate-200 rounded-xl p-5 hover:border-emerald-200 transition-colors">
+                        <h4 className="font-bold text-slate-800 mb-1 flex items-center gap-2"><TrendingUp className="w-4 h-4 text-emerald-500"/> Hidden Gem</h4>
+                        <p className="text-sm text-slate-600">
+                            Products with <strong>Low Traffic</strong> but <strong>High Conversion</strong> (&gt;3.0%).
+                            <br/><span className="text-xs text-emerald-600 mt-1 block">Action: Scale ads or feature in livestreams immediately.</span>
+                        </p>
+                    </div>
+
+                    <div className="bg-white border border-slate-200 rounded-xl p-5">
+                        <h4 className="font-bold text-slate-800 mb-1">Metrics Key</h4>
+                        <ul className="text-sm text-slate-600 space-y-1">
+                            <li><strong className="text-slate-800">GMV:</strong> Gross Merchandise Value (Total Sales Revenue).</li>
+                            <li><strong className="text-slate-800">CTR:</strong> Click-Through Rate (Interest metric).</li>
+                            <li><strong className="text-slate-800">CVR:</strong> Conversion Rate (Sales efficiency metric).</li>
                         </ul>
                     </div>
                 </div>
+            </div>
+
+            {/* Footer */}
+            <div className="text-center pt-8 border-t border-slate-200">
+                <p className="text-sm text-slate-400">© 2024 Quantro Analytics. Enterprise Grade Security.</p>
             </div>
         </div>
     </div>
@@ -1910,146 +2093,135 @@ const LandingPage = ({ onLogin }) => {
     };
 
     return (
-        <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 font-sans">
-            <div className="bg-white rounded-3xl shadow-2xl overflow-hidden max-w-6xl w-full flex flex-col md:flex-row min-h-[600px]">
+        <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 font-sans selection:bg-violet-500 selection:text-white">
+            <div className="bg-white rounded-[2rem] shadow-2xl overflow-hidden max-w-7xl w-full flex flex-col lg:flex-row min-h-[700px] border border-slate-800">
                 
-                {/* LEFT PANEL: Value Prop & Visuals */}
-                <div className="p-12 md:w-3/5 flex flex-col justify-center bg-gradient-to-br from-violet-600 to-indigo-900 text-white relative overflow-hidden">
-                    {/* Background Decor */}
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-                    <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
-
+                {/* LEFT PANEL: Narrative & Value */}
+                <div className="lg:w-3/5 relative overflow-hidden bg-slate-900 text-white p-12 lg:p-16 flex flex-col justify-between">
+                    
+                    {/* Background Gradients */}
+                    <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-violet-600/20 rounded-full blur-[120px] pointer-events-none -translate-y-1/2 translate-x-1/2"></div>
+                    <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-indigo-600/20 rounded-full blur-[120px] pointer-events-none translate-y-1/2 -translate-x-1/2"></div>
+                    
+                    {/* Header */}
                     <div className="relative z-10">
-                        <div className="flex items-center gap-3 mb-8">
-                            <div className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center text-white text-xl font-bold border border-white/30">Q</div>
-                            <span className="font-bold text-lg tracking-wide opacity-90">QUANTRO INTELLIGENCE</span>
+                        <div className="flex items-center gap-3 mb-10">
+                            <div className="w-10 h-10 bg-gradient-to-br from-violet-600 to-indigo-600 rounded-xl flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-violet-900/50">Q</div>
+                            <span className="font-bold text-lg tracking-widest text-slate-300">QUANTRO</span>
                         </div>
 
-                        <h1 className="text-4xl md:text-5xl font-extrabold mb-6 leading-tight">
-                            Stop Losing Profit to <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-cyan-300">Hidden Data.</span>
+                        <h1 className="text-5xl lg:text-6xl font-extrabold mb-8 leading-tight tracking-tight">
+                            The intelligence layer for 
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-fuchsia-400 to-white"> multi-platform e-commerce operations</span>
                         </h1>
                         
-                        <p className="text-lg text-violet-100 mb-10 leading-relaxed max-w-lg">
-                            Aggregate TikTok, Lazada, and Shopee sales in one view. See lifetime value, true net profit, and inventory leaks instantly—without the spreadsheet chaos.
+                        <p className="text-xl text-slate-400 mb-12 max-w-xl leading-relaxed">
+                            Stop toggling between Seller Centers. Quantro consolidates TikTok, Shopee, and Lazada into one command center. Unlock lifetime insights, true profit analysis, and AI-driven growth opportunities.
                         </p>
 
-                        {/* Visual Proof / Mock Card */}
-                        <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-6 mb-8 max-w-md transform hover:scale-[1.02] transition-transform duration-500 shadow-2xl">
-                            <div className="flex justify-between items-end mb-4">
-                                <div>
-                                    <p className="text-xs font-bold uppercase tracking-wider text-violet-200 mb-1">Lifetime GMV (All Channels)</p>
-                                    <p className="text-3xl font-bold text-white">฿8,245,000</p>
-                                </div>
-                                <div className="text-right">
-                                    <div className="flex items-center gap-1 text-emerald-300 text-sm font-bold bg-emerald-500/20 px-2 py-1 rounded-lg border border-emerald-500/30">
-                                        <TrendingUp className="w-3 h-3" /> +24%
-                                    </div>
-                                </div>
+                        <div className="grid grid-cols-2 gap-8 max-w-lg">
+                            <div className="space-y-2">
+                                <h3 className="text-white font-bold flex items-center gap-2"><Database className="w-4 h-4 text-violet-400"/> Centralized Data</h3>
+                                <p className="text-sm text-slate-400">One view for all your channels. No more CSV nightmares.</p>
                             </div>
                             <div className="space-y-2">
-                                <div className="flex justify-between text-[10px] text-violet-200 uppercase font-bold tracking-wide">
-                                    <span>Market Share</span>
-                                </div>
-                                <div className="h-2 w-full bg-black/20 rounded-full overflow-hidden flex">
-                                    <div className="w-[45%] bg-emerald-400"></div>
-                                    <div className="w-[30%] bg-blue-400"></div>
-                                    <div className="w-[25%] bg-rose-400"></div>
-                                </div>
-                                <div className="flex justify-between mt-1 text-[10px] text-violet-200 font-medium">
-                                    <div className="flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>TikTok Shop</div>
-                                    <div className="flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-blue-400"></div>Shopee</div>
-                                    <div className="flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-rose-400"></div>Lazada</div>
-                                </div>
+                                <h3 className="text-white font-bold flex items-center gap-2"><Calculator className="w-4 h-4 text-emerald-400"/> True Net Profit</h3>
+                                <p className="text-sm text-slate-400">Real-time deduction of ads, COGS, and operational costs.</p>
+                            </div>
+                            <div className="space-y-2">
+                                <h3 className="text-white font-bold flex items-center gap-2"><Zap className="w-4 h-4 text-amber-400"/> AI Recommendations</h3>
+                                <p className="text-sm text-slate-400">Instantly spot hidden gems and funnel leaks.</p>
+                            </div>
+                            <div className="space-y-2">
+                                <h3 className="text-white font-bold flex items-center gap-2"><Clock className="w-4 h-4 text-blue-400"/> Lifetime History</h3>
+                                <p className="text-sm text-slate-400">Access data beyond the 90-day platform limits.</p>
                             </div>
                         </div>
+                    </div>
 
-                        <div className="space-y-4 text-violet-100">
-                            <div className="flex items-start gap-3 group">
-                                <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5 group-hover:scale-110 transition-transform" />
-                                <span><strong>Lifetime History:</strong> Break free from the 90-day platform limit.</span>
-                            </div>
-                            <div className="flex items-start gap-3 group">
-                                <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5 group-hover:scale-110 transition-transform" />
-                                <span><strong>True Profit:</strong> Auto-deduct Ads, Fees, and COGS in real-time.</span>
-                            </div>
-                            <div className="flex items-start gap-3 group">
-                                <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5 group-hover:scale-110 transition-transform" />
-                                <span><strong>Funnel Doctor:</strong> Identify "Hidden Gems" and "Funnel Leaks" automatically.</span>
-                            </div>
+                    {/* Trust/Footer */}
+                    <div className="relative z-10 mt-12 pt-8 border-t border-slate-800 flex items-center justify-between text-xs text-slate-500 uppercase tracking-widest">
+                        <span>Trusted by 1,200+ Brands</span>
+                        <div className="flex gap-4">
+                            <span className="flex items-center gap-1"><Lock className="w-3 h-3"/> SOC2 Compliant</span>
+                            <span className="flex items-center gap-1"><Globe className="w-3 h-3"/> Global Support</span>
                         </div>
                     </div>
                 </div>
 
-                {/* RIGHT PANEL: Demo Access */}
-                <div className="p-12 md:w-2/5 bg-white flex flex-col justify-center relative">
-                    <div className="max-w-sm mx-auto w-full">
-                        <div className="mb-8">
-                            <h2 className="text-3xl font-bold text-slate-900 mb-2 tracking-tight">See Quantro in Action</h2>
-                            <p className="text-slate-500">Instant access to the live demo environment.</p>
+                {/* RIGHT PANEL: Interaction */}
+                <div className="lg:w-2/5 bg-white p-12 lg:p-16 flex flex-col justify-center relative">
+                    <div className="max-w-md mx-auto w-full">
+                        <div className="mb-10 text-center lg:text-left">
+                            <h2 className="text-3xl font-bold text-slate-900 mb-3">Access Demo Environment</h2>
+                            <p className="text-slate-500">Experience the full power of Quantro with our live interactive demo.</p>
                         </div>
 
-                        <form onSubmit={handleSubmit} className="space-y-5">
-                            <div>
-                                <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Organization Name</label>
-                                <div className="relative group">
-                                    <User className="absolute left-4 top-3.5 w-5 h-5 text-slate-400 group-focus-within:text-violet-600 transition-colors" />
+                        <form onSubmit={handleSubmit} className="space-y-6">
+                            <div className="space-y-2">
+                                <label className="text-sm font-bold text-slate-700">Organization Name</label>
+                                <div className="relative">
+                                    <User className="absolute left-4 top-3.5 w-5 h-5 text-slate-400" />
                                     <input 
                                         type="text" 
                                         required
                                         value={name}
                                         onChange={(e) => setName(e.target.value)}
-                                        placeholder="Your Company Name"
-                                        className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none transition-all font-medium text-slate-800 placeholder:text-slate-400"
+                                        placeholder="e.g. Acme Corp"
+                                        className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none transition-all font-medium text-slate-900 placeholder:text-slate-400"
                                     />
                                 </div>
                             </div>
                             
-                            <div>
-                                <div className="flex justify-between items-center mb-2">
-                                    <label className="block text-xs font-bold text-slate-500 uppercase">Demo Access Key</label>
-                                    <span className="text-xs text-violet-700 bg-violet-50 px-2 py-0.5 rounded font-mono font-bold border border-violet-100">key: admin123</span>
+                            <div className="space-y-2">
+                                <div className="flex justify-between items-center">
+                                    <label className="text-sm font-bold text-slate-700">Access Key</label>
+                                    <div className="flex items-center gap-2 px-2 py-1 bg-violet-50 border border-violet-100 rounded-md">
+                                        <span className="text-[10px] uppercase font-bold text-violet-600">Demo Key:</span>
+                                        <code className="text-xs font-mono font-bold text-violet-700">admin123</code>
+                                    </div>
                                 </div>
-                                <div className="relative group">
-                                    <Key className="absolute left-4 top-3.5 w-5 h-5 text-slate-400 group-focus-within:text-violet-600 transition-colors" />
+                                <div className="relative">
+                                    <Key className="absolute left-4 top-3.5 w-5 h-5 text-slate-400" />
                                     <input 
                                         type="password" 
                                         required
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
-                                        placeholder="Enter Access Key"
-                                        className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none transition-all font-medium text-slate-800 placeholder:text-slate-400"
+                                        placeholder="Enter key"
+                                        className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none transition-all font-medium text-slate-900 placeholder:text-slate-400"
                                     />
                                 </div>
                             </div>
 
                             <button 
                                 type="submit"
-                                className="w-full bg-violet-600 text-white font-bold py-4 rounded-xl hover:bg-violet-700 hover:shadow-xl hover:shadow-violet-200 transition-all active:scale-[0.98] flex items-center justify-center gap-2 group"
+                                className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-bold py-4 rounded-xl hover:shadow-lg hover:shadow-violet-200 hover:scale-[1.02] transition-all active:scale-[0.98] flex items-center justify-center gap-2 group"
                             >
-                                Launch Demo Dashboard <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                Launch Dashboard <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                             </button>
-                            
-                            <p className="text-center text-xs text-slate-400 mt-4">
-                                <span className="flex items-center justify-center gap-1">
-                                    <Lock className="w-3 h-3" /> No credit card required for demo.
-                                </span>
-                            </p>
                         </form>
 
-                        <div className="mt-8 pt-8 border-t border-slate-100">
-                            <p className="text-xs text-center text-slate-400 font-medium uppercase tracking-wide mb-4">Trusted by Sellers On</p>
-                            <div className="flex justify-center gap-6 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
-                                <div className="flex items-center gap-1.5 group cursor-default">
-                                    <div className="p-1.5 bg-slate-100 rounded-lg group-hover:bg-slate-200 transition-colors"><Smartphone className="w-4 h-4 text-slate-600" /></div>
-                                    <span className="font-bold text-sm text-slate-600">TikTok</span>
+                        <div className="mt-10">
+                            <p className="text-xs text-center text-slate-400 font-medium uppercase tracking-wide mb-6">Integrates seamlessly with</p>
+                            <div className="flex justify-center gap-8 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
+                                <div className="flex flex-col items-center gap-2 group cursor-default">
+                                    <div className="p-3 bg-slate-50 rounded-2xl group-hover:bg-slate-100 transition-colors border border-slate-100">
+                                        <Smartphone className="w-6 h-6 text-slate-700" />
+                                    </div>
+                                    <span className="text-[10px] font-bold text-slate-500">TikTok</span>
                                 </div>
-                                <div className="flex items-center gap-1.5 group cursor-default">
-                                    <div className="p-1.5 bg-slate-100 rounded-lg group-hover:bg-slate-200 transition-colors"><ShoppingBag className="w-4 h-4 text-slate-600" /></div>
-                                    <span className="font-bold text-sm text-slate-600">Shopee</span>
+                                <div className="flex flex-col items-center gap-2 group cursor-default">
+                                    <div className="p-3 bg-slate-50 rounded-2xl group-hover:bg-slate-100 transition-colors border border-slate-100">
+                                        <ShoppingBag className="w-6 h-6 text-slate-700" />
+                                    </div>
+                                    <span className="text-[10px] font-bold text-slate-500">Shopee</span>
                                 </div>
-                                <div className="flex items-center gap-1.5 group cursor-default">
-                                    <div className="p-1.5 bg-slate-100 rounded-lg group-hover:bg-slate-200 transition-colors"><Globe className="w-4 h-4 text-slate-600" /></div>
-                                    <span className="font-bold text-sm text-slate-600">Lazada</span>
+                                <div className="flex flex-col items-center gap-2 group cursor-default">
+                                    <div className="p-3 bg-slate-50 rounded-2xl group-hover:bg-slate-100 transition-colors border border-slate-100">
+                                        <Globe className="w-6 h-6 text-slate-700" />
+                                    </div>
+                                    <span className="text-[10px] font-bold text-slate-500">Lazada</span>
                                 </div>
                             </div>
                         </div>
@@ -2254,47 +2426,91 @@ export default function App() {
 
   // --- Import Logic ---
 
-  const normalizeData = (jsonData, filename) => {
+    // --- Final Phase: Universal Data Normalization (TikTok, Lazada, Shopee, Amazon) ---
+
+    const normalizeData = (jsonData, filename) => {
     if (!jsonData || jsonData.length === 0) return [];
 
     const headers = Object.keys(jsonData[0]).map(h => h.toLowerCase());
     let detectedPlatform = 'Unknown';
     
+    // 1. Enhanced Platform Detection
     if (headers.some(h => h.includes('tiktok') || h.includes('shop tab gmv'))) detectedPlatform = 'TikTok';
     else if (headers.some(h => h.includes('lazada') || h.includes('seller sku'))) detectedPlatform = 'Lazada';
     else if (headers.some(h => h.includes('shopee') || h.includes('variation id'))) detectedPlatform = 'Shopee';
-    else if (headers.some(h => h.includes('amazon') || h.includes('asin'))) detectedPlatform = 'Amazon';
+    else if (headers.some(h => h.includes('amazon') || h.includes('asin') || h.includes('listing-id'))) detectedPlatform = 'Amazon';
 
     addNotification(`Detected Platform: ${detectedPlatform}`);
 
-    const findVal = (row, keywords) => {
-      const key = Object.keys(row).find(k => keywords.some(kw => k.toLowerCase().includes(kw)));
-      return key ? row[key] : null;
+    // 2. The "Blocklist" Logic (Prevents IDs from being used as Names)
+    const findVal = (row, keywords, blocklist = []) => {
+        const key = Object.keys(row).find(k => {
+        const lowerK = k.toLowerCase();
+        
+        // Safety Check: If header contains a "blocked" word, skip it immediately.
+        const isBlocked = blocklist.some(blockWord => lowerK.includes(blockWord));
+        if (isBlocked) return false;
+
+        // Match Check: Does it match our target keywords?
+        return keywords.some(kw => lowerK === kw || lowerK.includes(kw));
+        });
+        return key ? row[key] : null;
     };
 
     return jsonData.map((row, index) => {
-      const id = findVal(row, ['product id', 'item id', 'id', 'sku', 'asin', 'variation id']) || `gen-${index}`;
-      const name = findVal(row, ['product name', 'item name', 'product', 'title']) || 'Unknown Product';
-      const status = findVal(row, ['status', 'product status']) || 'Active';
+        // --- ID DETECTION ---
+        // Added 'asin' (Amazon) and 'listing id' (General)
+        const idKeywords = [
+            'product id', 'item id', 'variation id', 'sku', 'seller sku', 
+            'asin', 'listing id', 'listing-id', 'reference', 'code'
+        ];
+        const id = findVal(row, idKeywords) || `gen-${index}`;
 
-      const gmv = parseCurrency(findVal(row, ['gmv', 'revenue', 'total sales', 'sales', 'amount', 'ordered product sales']));
-      const sold = parseCurrency(findVal(row, ['items sold', 'units sold', 'sold', 'quantity', 'units']));
-      const orders = parseCurrency(findVal(row, ['orders', 'total orders']));
-      const views = parseCurrency(findVal(row, ['views', 'page view', 'impressions', 'sessions', 'visitors']));
-      
-      const shopGmv = parseCurrency(findVal(row, ['shop tab gmv', 'mall sales']));
-      const videoGmv = parseCurrency(findVal(row, ['video gmv', 'content sales']));
-      const liveGmv = parseCurrency(findVal(row, ['live gmv', 'livestream sales']));
+        // --- NAME DETECTION ---
+        // Added 'item-name' (Amazon style) and 'product_name' (Snake case)
+        const nameKeywords = [
+            'product name', 'item name', 'item-name', 'title', 
+            'product_title', 'name', 'product', 'listing name'
+        ];
+        
+        // CRITICAL: The "Do Not Touch" List
+        // If a column has these words, it is NEVER a name.
+        const nameBlocklist = [
+            'id', 'sku', 'code', 'number', 'ref', 
+            'asin', 'parent', 'variation', 'option'
+        ]; 
+        
+        const name = findVal(row, nameKeywords, nameBlocklist) || 'Unknown Product';
+        
+        // Status Detection
+        const status = findVal(row, ['status', 'product status', 'state', 'listing status']) || 'Active';
 
-      let ctr = findVal(row, ['click-through', 'ctr']);
-      let cvr = findVal(row, ['conversion rate', 'cvr', 'conversion']);
-      
-      if (typeof cvr === 'number') cvr = (cvr * 100).toFixed(2) + '%';
-      if (!cvr) cvr = "0.00%";
-      if (!ctr) ctr = "0.00%";
-      if (typeof ctr === 'number') ctr = (ctr * 100).toFixed(2) + '%';
-      
-      return {
+        // --- METRICS (Universal Parsers) ---
+        // Covers "Ordered Product Sales" (Amazon), "GMV" (TikTok), "Total Price" (Shopee)
+        const gmv = parseCurrency(findVal(row, ['gmv', 'revenue', 'total sales', 'sales amount', 'ordered product sales', 'price', 'amount']));
+        
+        // Covers "Units Ordered" (Amazon), "Items Sold" (TikTok)
+        const sold = parseCurrency(findVal(row, ['items sold', 'units sold', 'sold', 'quantity', 'units', 'units ordered']));
+        
+        const orders = parseCurrency(findVal(row, ['orders', 'total orders']));
+        const views = parseCurrency(findVal(row, ['views', 'page view', 'impressions', 'visitors', 'sessions']));
+        
+        // Channel Specifics
+        const shopGmv = parseCurrency(findVal(row, ['shop tab gmv', 'mall sales', 'shop sales']));
+        const videoGmv = parseCurrency(findVal(row, ['video gmv', 'content sales']));
+        const liveGmv = parseCurrency(findVal(row, ['live gmv', 'livestream sales']));
+
+        // Conversion Rates
+        let ctr = findVal(row, ['click-through', 'ctr']);
+        let cvr = findVal(row, ['conversion rate', 'cvr', 'conversion', 'unit session percentage']); // Amazon uses "Unit Session Percentage"
+        
+        // Formatting
+        if (typeof cvr === 'number') cvr = (cvr * 100).toFixed(2) + '%';
+        if (!cvr) cvr = "0.00%";
+        if (!ctr) ctr = "0.00%";
+        if (typeof ctr === 'number') ctr = (ctr * 100).toFixed(2) + '%';
+        
+        return {
         id: String(id),
         name: String(name),
         status: String(status),
@@ -2312,55 +2528,68 @@ export default function App() {
         platform: detectedPlatform,
         sourceFile: filename,
         importDate: new Date().toISOString()
-      };
+        };
     }).filter(p => p.name !== 'Unknown Product' && p.gmv >= 0); 
-  };
+    };
 
-  const handleFileUpload = (e) => {
+  // --- Phase 2: Stricter File Reading & Header Detection ---
+
+    const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
+    // Prevent duplicate uploads
     if (uploadedFiles.some(f => (typeof f === 'string' ? f : f.name) === file.name)) {
         if(!window.confirm(`File "${file.name}" has already been uploaded. Do you want to process it again (it will overwrite duplicates)?`)) {
             return;
         }
     }
 
+    // Safety check for library loading
     if (!isExcelReady) {
-      addNotification("Excel engine loading... please try again in 3 seconds.", "error");
-      return;
+        addNotification("Excel engine loading... please try again in 3 seconds.", "error");
+        return;
     }
 
     const reader = new FileReader();
     
     reader.onload = (e) => {
-      try {
+        try {
         const data = new Uint8Array(e.target.result);
         const workbook = window.XLSX.read(data, { type: 'array' });
         const firstSheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[firstSheetName];
         
+        // Get all rows
         const rawRows = window.XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "" });
         
         let headerRowIndex = -1;
         let headers = [];
 
-        // Flexible header search
+        // IMPROVED HEADER DETECTION
+        // We loop through the first 25 rows to find the "real" header.
+        // We look for a row that has BOTH a Product/Name identifier AND a Sales/GMV metric.
         for(let i = 0; i < Math.min(25, rawRows.length); i++) {
-           const rowStr = rawRows[i].map(cell => String(cell).toLowerCase().trim()).join(' ');
-           // Expanded keywords for detection
-           if ((rowStr.includes('product') || rowStr.includes('sku') || rowStr.includes('asin') || rowStr.includes('title')) && 
-               (rowStr.includes('gmv') || rowStr.includes('sales') || rowStr.includes('revenue') || rowStr.includes('price'))) {
-               headerRowIndex = i;
-               headers = rawRows[i].map(h => String(h)); 
-               break;
-           }
+            const rowStr = rawRows[i].map(cell => String(cell).toLowerCase().trim()).join(' ');
+            
+            // 1. Must have an identifier
+            const hasIdentity = rowStr.includes('product') || rowStr.includes('sku') || rowStr.includes('name') || rowStr.includes('title');
+            
+            // 2. Must have a metric (to distinguish from summary rows)
+            const hasMetric = rowStr.includes('gmv') || rowStr.includes('sales') || rowStr.includes('revenue') || rowStr.includes('amount') || rowStr.includes('price') || rowStr.includes('sold');
+
+            if (hasIdentity && hasMetric) {
+                headerRowIndex = i;
+                headers = rawRows[i].map(h => String(h)); 
+                break;
+            }
         }
 
         if (headerRowIndex === -1) {
-             throw new Error("Could not find valid headers (Product/SKU/ASIN + Sales/GMV). Please check the file structure.");
+            throw new Error("Could not find valid headers. File must have columns for 'Product Name' and 'Sales/GMV'.");
         }
 
+        // Extract data based on the found header
         const dataRows = rawRows.slice(headerRowIndex + 1);
         const jsonData = dataRows.map(row => {
             let obj = {};
@@ -2372,21 +2601,25 @@ export default function App() {
 
         if (jsonData.length === 0) throw new Error("No data found after header row.");
 
+        // Process the data using the Phase 1 normalizeData function
         const normalized = normalizeData(jsonData, file.name);
-        if (normalized.length === 0) throw new Error("Data normalization failed. Ensure columns like 'Product Name' and 'GMV' exist.");
+        
+        if (normalized.length === 0) throw new Error("No valid products found. Please check column names.");
 
+        // Update State
         setProducts(prevProducts => {
             const productMap = new Map();
+            // Keep existing products
             prevProducts.forEach(p => productMap.set(p.id, p));
+            // Overwrite/Add new ones
             normalized.forEach(p => productMap.set(p.id, p));
             const merged = Array.from(productMap.values());
             return calculateABC(merged);
         });
 
-        // Store file metadata for Calendar
+        // Update File History
         setUploadedFiles(prev => {
             const newFile = { name: file.name, date: new Date().toISOString() };
-            // Filter out old string-only entries if mixing or if re-uploading same name
             const filtered = prev.filter(f => (typeof f === 'string' ? f : f.name) !== file.name);
             return [...filtered, newFile];
         });
@@ -2394,14 +2627,14 @@ export default function App() {
         setActiveView('dashboard');
         addNotification(`Imported ${normalized.length} products from ${file.name}`);
         
-      } catch (err) {
+        } catch (err) {
         console.error(err);
         addNotification(`Import failed: ${err.message}`, "error");
-      }
+        }
     };
 
     reader.readAsArrayBuffer(file);
-  };
+    };
 
   const handleExportCSV = () => {
     const headers = [
