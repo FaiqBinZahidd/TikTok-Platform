@@ -2111,8 +2111,8 @@ const LandingPage = ({ onLogin }) => {
                         </div>
 
                         <h1 className="text-5xl lg:text-6xl font-extrabold mb-8 leading-tight tracking-tight">
-                            The intelligence layer for 
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-fuchsia-400 to-white"> multi-platform e-commerce operations</span>
+                            Your E-commerce Data, <br/>
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-fuchsia-400 to-white">Unified & Weaponized.</span>
                         </h1>
                         
                         <p className="text-xl text-slate-400 mb-12 max-w-xl leading-relaxed">
