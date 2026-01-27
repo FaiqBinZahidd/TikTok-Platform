@@ -1,16 +1,82 @@
-# React + Vite
+# Quantro - Multi-Channel E-commerce Analytics Dashboard
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A comprehensive sales analytics platform for TikTok Shop, Shopee, and Lazada sellers.
 
-Currently, two official plugins are available:
+## 🚀 Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### Core Dashboard
+- Real-Time Metrics across all platforms
+- Multi-Channel Support (TikTok, Shopee, Lazada)
+- Smart Filtering and Search
+- ABC Analysis (Pareto Principle)
 
-## React Compiler
+### Analytics+ (Advanced)
+- Key Insights with AI recommendations
+- Cohort Analysis (daily/weekly/monthly)
+- RFM Segmentation (Recency/Frequency/Monetary)
+- Predictive Analytics (30-day forecasts)
+- Anomaly Detection
+- Customer Segmentation
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Settings & Localization
+- Multi-Language Support (English & Thai)
+- Multi-Currency Support (฿ $ € £ ¥)
+- Dashboard Customization
+- Alert Configuration
+- Tabbed Settings Interface
 
-## Expanding the ESLint configuration
+## 📦 Quick Start
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```bash
+cd shop-dashboard
+npm install
+npm run dev
+```
+
+**Demo Access**: Use `admin123` as access key
+
+## 🛠️ Tech Stack
+
+- React 19 + Vite
+- Tailwind CSS + PostCSS
+- Lucide React Icons
+- localStorage persistence
+
+## 🌍 Languages
+
+- English (Default)
+- Thai (ไทย)
+
+Switch in Settings → General Preferences
+
+## 📱 Responsive Design
+
+- Desktop optimized
+- Tablet compatible
+- Mobile-friendly
+- Touch support
+
+## 🔐 Security
+
+- Local browser storage only
+- No cloud uploads
+- No external tracking
+- Private data
+
+## 📊 Data Management
+
+- Excel/CSV import
+- CSV/JSON export
+- Multi-source support
+- Automatic backup
+
+## 💾 Storage
+
+- localStorage (~5-10MB)
+- Automatic persistence
+- Historical records
+- No sync required
+
+---
+
+**Version 3.0** - Production Ready | Made for Multi-Channel Sellers
